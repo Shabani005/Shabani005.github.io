@@ -32,6 +32,20 @@ nav a:hover {
     padding: 100px 20px;
     min-height: 100vh;
 }
+
+button {
+    color: #888;
+    background-color:#222;
+    text-decoration: none !important;
+    border: 0;
+    box-shadow: none;
+    border-radius: 0px;
+    
+}
+
+a {
+    color: inherit;
+  }
 #home { background-color: #111; }
 #projects { background-color: #222; }
 #info { background-color: #333; }
