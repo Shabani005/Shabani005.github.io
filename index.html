@@ -10,36 +10,81 @@
 <body>
     <link rel="stylesheet" href="style.css">
     <nav>
-        <a href="#home" onclick="scrollToSection('home')">Home</a>
-        <a href="#projects" onclick="scrollToSection('projects')">Projects</a>
-        <a href="#info" onclick="scrollToSection('info')">Info</a>
-        <a href="#contact" onclick="scrollToSection('contact')">Contact</a>
+        <span class="nav-name">Hasan Shabani</span>
+        <div class="nav-links">
+            <a href="#home" onclick="scrollToSection('home')">Home</a>
+            <a href="#projects" onclick="scrollToSection('projects')">Projects</a>
+            <a href="#contact" onclick="scrollToSection('contact')">Contact</a>
+        </div>
     </nav>
     
-    <div id="home" class="section">
-        <h1>Hasan Shabani</h1>
-        <p>Data Scientist and Upcoming AI Engineer</p>
+    <div id="home">
+        <p>Data Scientist and Upcoming Business Analyst</p>
+        <div class="skills-container">
+            <div class="skill-square" data-language="Python">
+                <img src="assets/python-logo.png" alt="Python">
+            </div>
+            <div class="skill-square" data-language="R">
+                <img src="assets/r-logo.png" alt="R">
+            </div>
+            <div class="skill-square" data-language="SQL">
+                <img src="assets/sql-logo.png" alt="SQL">
+            </div>
+            <div class="skill-square" data-language="Tableau">
+                <img src="assets/tableau-logo.png" alt="Tableau">
+            </div>
+            <div class="skill-square" data-language="Anaconda">
+                <img src="assets/anaconda-logo.png" alt="Anaconda">
+            </div>
+            <div class="skill-square" data-language="Matplotlib">
+                <img src="assets/matplotlib-logo.png" alt="Matplotlib">
+            </div>
+        </div>
+        <div class="scroll-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <polyline points="19 12 12 19 5 12"></polyline>
+            </svg>
+        </div>
     </div>
-    <div id="projects" class="section">
+    <div id="projects">
         <h2>Projects</h2>
-        <p> <a href=https://github.com/Shabani005/math_ocr> inference-based Python OCR "wrapper" for texify </a> </p>
-        <img src="assets/ocr_math.gif" alt="ocr demo" style="width:700px;height:394px;" onclick="expandGif(this)">
-        <!-- Modal for expanded GIF -->
+        <div class="projects-grid">
+            <div class="project-card">
+                <h3>Math OCR Texify Wrapper</h3>
+                <img src="assets/ocr_math.gif" alt="OCR demo" onclick="expandGif(this)">
+                <p>An inference-based Python OCR wrapper for Texify, enabling efficient mathematical equation recognition and conversion.</p>
+                <a href="https://github.com/Shabani005/math_ocr" class="project-link">View Project</a>
+            </div>
+
+            <div class="project-card">
+                <h3>Speech-2-Speech Model</h3>
+                <p>A collaborative project focused on developing advanced speech-to-speech translation capabilities.</p>
+                <a href="https://github.com/AitchEm-bot/S2S" class="project-link">View Project</a>
+            </div>
+        </div>
         <div id="gifModal" class="modal" onclick="closeGif()">
             <img id="expandedGif">
         </div>
-
-        <p> <a href=https://github.com/AitchEm-bot/S2S> Speech to Speech model collaboration</a> </p>
-
     </div>
-    <div id="info" class="section">
-        <h2>Info</h2>
-        <p>Additional information about you.</p>
-    </div>
-    <div id="contact" class="section">
-        <h2>Contact</h2>
-        <p>hasan.shabani2005@gmail.com</p>
-        <button> <a href="mailto:hasan.shabani2005@gmail.com"> Email me!</a></button>
+    <div id="contact">
+        <div class="contact-content">
+            <h2>Contact</h2>
+            <div class="contact-info">
+                <p>hasan.shabani2005@gmail.com</p>
+                <button class="glow-button">
+                    <a href="mailto:hasan.shabani2005@gmail.com">
+                        <span class="button-content">
+                            <svg class="mail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                            Get in Touch
+                        </span>
+                    </a>
+                </button>
+            </div>
+        </div>
     </div>
     
     <script src="main.js"></script>
