@@ -46,3 +46,65 @@ function closeGif() {
     document.getElementById('gifModal').style.display = 'none';
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+    const scrollArrow = document.querySelector('.scroll-arrow');
+    const projectsSection = document.getElementById('projects');
+    let isScrolling = false;
+    let lastScrollPosition = 0;
+
+    // Function to scroll to projects
+    function scrollToProjects() {
+        projectsSection.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Handle scroll arrow click
+    scrollArrow.addEventListener('click', (e) => {
+        e.preventDefault();
+        scrollToProjects();
+    });
+
+    // Single scroll event handler
+    window.addEventListener('scroll', () => {
+        const scrollPosition = window.scrollY;
+        const projectsOffset = projectsSection.offsetTop;
+        const windowHeight = window.innerHeight;
+        
+        // Calculate distances
+        const distanceToProjects = projectsOffset - scrollPosition;
+        const scrollPercentage = (scrollPosition / windowHeight) * 100;
+        
+        // Handle state changes
+        if (scrollPosition < 100) {
+            // At top - no arrow
+            document.body.classList.remove('scrolled', 'at-projects');
+            isScrolling = false;
+        } else if (scrollPosition >= projectsOffset - 300) {
+            // Near or at projects section - hide arrow
+            document.body.classList.remove('scrolled');
+            document.body.classList.add('at-projects');
+        } else {
+            // Between top and projects - show arrow
+            document.body.classList.add('scrolled');
+            document.body.classList.remove('at-projects');
+            
+            // Only trigger auto-scroll when scrolling down
+            if (!isScrolling && scrollPosition > lastScrollPosition) {
+                isScrolling = true;
+                setTimeout(() => {
+                    scrollToProjects();
+                }, 500);
+            }
+        }
+        
+        lastScrollPosition = scrollPosition;
+    });
+
+    // Make scrollToSection available globally
+    window.scrollToSection = function(sectionId) {
+        const section = document.getElementById(sectionId);
+        if (section) {
+            section.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
+});
+

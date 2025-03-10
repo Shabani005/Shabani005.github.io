@@ -68,20 +68,24 @@
         </div>
     </div>
     <div id="contact">
-        <div class="contact-content">
-            <h2>Contact</h2>
-            <div class="contact-info">
-                <p>hasan.shabani2005@gmail.com</p>
-                <button class="glow-button">
-                    <a href="mailto:hasan.shabani2005@gmail.com">
-                        <span class="button-content">
-                            <svg class="mail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                                <polyline points="22,6 12,13 2,6"></polyline>
-                            </svg>
-                            Get in Touch
-                        </span>
-                    </a>
+        <div class="ide-container">
+            <div class="ide-header">
+                <div class="ide-controls">
+                    <span class="control red"></span>
+                    <span class="control yellow"></span>
+                    <span class="control green"></span>
+                </div>
+                <div class="ide-title">PowerShell</div>
+            </div>
+            <div class="ide-content">
+                <div class="command-line">
+<span class="prompt">PS C:\Users\you></span><span class="command">Send-MailMessage -From "your@email.com" -To "hasan.shabani2005@gmail.com"</span>
+                </div>
+                <button class="run-button" onclick="window.location.href='mailto:hasan.shabani2005@gmail.com'">
+                    <svg class="run-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    Run
                 </button>
             </div>
         </div>

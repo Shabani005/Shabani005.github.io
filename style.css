@@ -1,6 +1,6 @@
 /* Scrollbar Styles */
 ::-webkit-scrollbar {
-    width: 8px;
+    width: 0.5rem;
 }
 
 ::-webkit-scrollbar-track {
@@ -9,7 +9,7 @@
 
 ::-webkit-scrollbar-thumb {
     background: #444;
-    border-radius: 4px;
+    border-radius: 0.25rem;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -24,7 +24,8 @@
 
 /* Default GIF style */
 .gif {
-    width: 200px; /* Small size initially */
+    width: 100%;
+    max-width: 12.5rem;
     cursor: pointer;
     transition: transform 0.2s ease-in-out;
 }
@@ -52,8 +53,8 @@
 #expandedGif {
     max-width: 90%;
     max-height: 90vh;
-    border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border-radius: 0.75rem;
+    box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.3);
     transition: transform 0.3s ease;
 }
 
@@ -146,15 +147,35 @@ nav a:hover::after {
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
-    padding: 25vh 2rem 0 2rem;
-    min-height: 100vh;
+    padding: 12vh 2rem 2rem 2rem;
+    min-height: 80vh;
     transition: all 0.8s ease-out;
     position: relative;
 }
 
 .scrolled #home {
-    padding-top: 10vh;
-    margin-bottom: -50vh;
+    padding-top: 8vh;
+    margin-bottom: 0;
+    pointer-events: none;
+}
+
+.scrolled #home p,
+.scrolled .skills-container {
+    opacity: 0;
+    transform: translateY(-50px);
+    transition: all 0.5s ease;
+}
+
+.scrolled .scroll-arrow {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    transition: all 0.5s ease;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 100;
 }
 
 #projects {
@@ -163,37 +184,35 @@ nav a:hover::after {
     display: flex;
     flex-direction: column;
     align-items: center;
-    transform: translateY(30vh);
-    opacity: 0;
+    opacity: 1;
     transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     z-index: 2;
-    margin-top: -40vh;
-    margin-bottom: -10vh;
+    margin: 0;
+    min-height: auto;
 }
 
 #projects.visible {
-    transform: translateY(-40vh);
+    transform: translateY(0);
     opacity: 1;
 }
 
-#contact { 
-    background-color: #333;
-    padding: 2rem;
+#contact {
+    background-color: #1e1e1e;
+    padding: 2rem 2rem;
     min-height: 20vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    margin-top: -20vh;
     position: relative;
     z-index: 1;
-    margin-top: -15vh;
+    margin-top: 0;
 }
 
 #home p {
     font-size: 3.5rem;
-    margin-bottom: 5rem;
+    margin-bottom: 3rem;
     color: #fff;
     font-weight: 500;
     letter-spacing: 0.5px;
@@ -213,11 +232,11 @@ nav a:hover::after {
 }
 
 h2 {
-    font-size: 3rem;
+    font-size: 2.5rem;
     color: #fff;
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
     position: relative;
-    padding-bottom: 1rem;
+    padding-bottom: 0.8rem;
 }
 
 h2::after {
@@ -236,14 +255,15 @@ h2::after {
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
-    gap: 2.5rem;
-    margin-top: 2rem;
-    padding: 2rem 0;
-    max-width: 1400px;
+    gap: clamp(1rem, 2vw, 2.5rem);
+    margin-top: 1rem;
+    padding: 1rem 0;
+    width: 90%;
+    max-width: 87.5rem;
     opacity: 1;
     transform: translateY(0);
     transition: all 0.8s ease;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
 }
 
 .scrolled .skills-container {
@@ -253,10 +273,10 @@ h2::after {
 }
 
 .skill-square {
-    width: 180px;
-    height: 180px;
+    width: clamp(8rem, 15vw, 11.25rem);
+    height: clamp(8rem, 15vw, 11.25rem);
     background-color: rgba(34, 34, 34, 0.7);
-    border-radius: 15px;
+    border-radius: 0.9375rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -286,19 +306,18 @@ h2::after {
 
 .projects-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 2rem;
-    padding: 2rem;
-    max-width: 1400px;
-    margin: 0 auto;
-    width: 100%;
-    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    grid-template-columns: repeat(auto-fit, minmax(min(20rem, 100%), 1fr));
+    gap: 1.5rem;
+    padding: 1rem;
+    width: 90%;
+    max-width: 87.5rem;
+    margin: 1rem auto;
 }
 
 .project-card {
     background-color: rgba(51, 51, 51, 0.7);
-    border-radius: 20px;
-    padding: 2rem;
+    border-radius: 1rem;
+    padding: 1.5rem;
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     flex-direction: column;
@@ -329,22 +348,20 @@ h2::after {
 }
 
 .project-card h3 {
-    color: #fff;
-    font-size: 1.6rem;
-    margin-bottom: 1.5rem;
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
 }
 
 .project-card p {
-    color: #aaa;
-    font-size: 1.1rem;
-    line-height: 1.6;
-    margin-bottom: 2rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
 }
 
 .project-card img {
     width: 100%;
-    border-radius: 12px;
-    margin-bottom: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
@@ -435,12 +452,14 @@ h2::after {
     }
 
     #home {
-        padding-top: 20vh;
+        padding-top: 10vh;
+        padding-bottom: 2rem;
+        min-height: 70vh;
     }
 
     #home p {
         font-size: 2.5rem;
-        margin-bottom: 3rem;
+        margin-bottom: 2rem;
     }
 
     .scrolled #home p {
@@ -460,14 +479,17 @@ h2::after {
         height: 150px;
     }
 
-    .projects-grid {
-        grid-template-columns: 1fr;
-        padding: 1rem;
+    #projects {
+        padding: 3rem 1rem;
     }
-
-    #contact {
-        min-height: 15vh;
-        padding: 1.5rem;
+    
+    h2 {
+        font-size: 2rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .project-card {
+        padding: 1.25rem;
     }
     
     .contact-info p {
@@ -477,6 +499,18 @@ h2::after {
     .glow-button {
         padding: 0.6rem 1.2rem;
         font-size: 1rem;
+    }
+
+    .ide-container {
+        margin: 0 1rem;
+    }
+    
+    .command-line {
+        font-size: 0.8rem;
+    }
+
+    #contact {
+        padding: 1.5rem 2rem;
     }
 }
 
@@ -488,20 +522,51 @@ h2::after {
     .scrolled #home p {
         font-size: 1.2rem;
     }
+
+    .command {
+        display: block;
+        margin-top: 0.5rem;
+    }
+
+    .command-line {
+        font-size: 0.75rem;
+    }
 }
 
 /* Animated Arrow */
 .scroll-arrow {
-    margin-top: 1rem;
+    margin-top: 2rem;
     cursor: pointer;
     opacity: 0;
     transform: translateY(20px);
     animation: fadeInUp 0.8s ease forwards 1s, bounce 2s ease-in-out infinite;
+    transition: opacity 0.8s ease, transform 0.8s ease;
+    position: relative;
+    z-index: 100;
+}
+
+.scrolled .scroll-arrow {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.at-projects .scroll-arrow {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translate(-50%, -50%) scale(0.95);
+    transition: opacity 2s ease-out, transform 2s ease-out;
 }
 
 .scroll-arrow svg {
-    width: 40px;
-    height: 40px;
+    width: 2.5rem;
+    height: 2.5rem;
     color: #fff;
 }
 
@@ -515,4 +580,175 @@ h2::after {
     60% {
         transform: translateY(-10px);
     }
+}
+
+.ide-container {
+    background-color: #1e1e1e;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.25rem 1.25rem rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 55rem;
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+.ide-header {
+    background-color: #2d2d2d;
+    padding: 0.8rem 1rem;
+    display: flex;
+    align-items: center;
+    border-bottom: 0.0625rem solid #3d3d3d;
+}
+
+.ide-controls {
+    display: flex;
+    gap: 0.5rem;
+    margin-right: 1rem;
+}
+
+.control {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+}
+
+.control.red { background-color: #ff5f56; }
+.control.yellow { background-color: #ffbd2e; }
+.control.green { background-color: #27c93f; }
+
+.ide-title {
+    color: #858585;
+    font-size: 0.9rem;
+}
+
+.ide-content {
+    padding: 1.5rem 2rem;
+    background-color: #1e1e1e;
+    font-family: 'Consolas', 'Monaco', monospace;
+}
+
+.command-line {
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+    white-space: nowrap;
+    overflow-x: auto;
+    padding: 0.5rem 0;
+    width: 100%;
+    font-size: clamp(0.75rem, 1.5vw, 1rem);
+}
+
+.prompt {
+    color: #569cd6;
+    margin-right: 0.25rem;
+}
+
+.command {
+    color: #d4d4d4;
+    display: inline;
+}
+
+.run-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: #2ea043;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    font-size: clamp(0.8rem, 1.5vw, 0.9rem);
+    transition: background-color 0.2s ease;
+}
+
+.run-button:hover {
+    background-color: #3fb950;
+}
+
+.run-icon {
+    width: 1rem;
+    height: 1rem;
+    stroke: currentColor;
+}
+
+/* Responsive adjustments */
+@media (max-width: 48rem) { /* 768px */
+    .ide-container {
+        width: 95%;
+    }
+    
+    .ide-content {
+        padding: 1rem 1.5rem;
+    }
+    
+    .command-line {
+        font-size: clamp(0.7rem, 1.3vw, 0.8rem);
+    }
+}
+
+@media (max-width: 30rem) { /* 480px */
+    .ide-container {
+        width: 98%;
+    }
+    
+    .ide-content {
+        padding: 0.8rem 1rem;
+    }
+    
+    .command-line {
+        font-size: clamp(0.65rem, 1.2vw, 0.75rem);
+    }
+    
+    .run-button {
+        padding: 0.5rem 1rem;
+        font-size: clamp(0.7rem, 1.3vw, 0.8rem);
+    }
+}
+
+/* Skills container responsive adjustments */
+.skills-container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: clamp(1rem, 2vw, 2.5rem);
+    margin-top: 2rem;
+    padding: 2rem 0;
+    width: 90%;
+    max-width: 87.5rem;
+}
+
+.skill-square {
+    width: clamp(8rem, 15vw, 11.25rem);
+    height: clamp(8rem, 15vw, 11.25rem);
+    background-color: rgba(34, 34, 34, 0.7);
+    border-radius: 0.9375rem;
+}
+
+.skill-square img {
+    width: 65%;
+    height: 65%;
+    object-fit: contain;
+}
+
+/* Project cards responsive */
+.projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(20rem, 100%), 1fr));
+    gap: 1.5rem;
+    padding: 1rem;
+    width: 90%;
+    max-width: 87.5rem;
+}
+
+.project-card {
+    border-radius: 1rem;
+    padding: 1.5rem;
+}
+
+.project-card h3 {
+    font-size: 1.4rem;
+}
+
+.project-card p {
+    font-size: 1rem;
 }
