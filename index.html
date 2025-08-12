@@ -13,17 +13,34 @@
 <button id="dwlBtn" type="button">Download</button>
 
 <script>
-  document.getElementById("dwlBtn").addEventListener("click", function () {
+  document.getElementById("dwlBtn").addEventListener("click", async function () {
     const fileUrl =
       "https://raw.githubusercontent.com/Shabani005/Shabani005.github.io/refs/heads/main/README.md";
 
-    // Create a temporary link element
-    const a = document.createElement("a");
-    a.href = fileUrl;
-    a.download = "README.md"; // Suggested filename
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    try {
+      // Fetch the file as a Blob
+      const response = await fetch(fileUrl);
+      if (!response.ok) throw new Error("Network response was not ok");
+
+      const blob = await response.blob();
+
+      // Create a temporary object URL for the Blob
+      const url = window.URL.createObjectURL(blob);
+
+      // Create a hidden link and trigger download
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "README.md"; // Suggested filename
+      document.body.appendChild(a);
+      a.click();
+
+      // Cleanup
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Download failed:", error);
+      alert("Failed to download file.");
+    }
   });
 </script>
         <div class="nav-links">
