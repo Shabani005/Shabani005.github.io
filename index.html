@@ -10,6 +10,22 @@
     <link rel="stylesheet" href="style.css">
     <nav>
         <span class="nav-name">-Hasan Shabani</span>
+<button id="dwlBtn" type="button">Download</button>
+
+<script>
+  document.getElementById("dwlBtn").addEventListener("click", function () {
+    const fileUrl =
+      "https://raw.githubusercontent.com/Shabani005/Shabani005.github.io/refs/heads/main/README.md";
+
+    // Create a temporary link element
+    const a = document.createElement("a");
+    a.href = fileUrl;
+    a.download = "README.md"; // Suggested filename
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  });
+</script>
         <div class="nav-links">
             <a href="#" data-section="home" class="active">Home</a>
             <a href="#" data-section="projects">Projects</a>
