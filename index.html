@@ -1,164 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio</title>
-    <link rel="icon" type="image/x-icon" href="assets/Code_javascript_development-512.ico">
-</head>
-<body>
-    <link rel="stylesheet" href="style.css">
-    <nav>
-        <span class="nav-name">Hasan Shabani</span>
-<button id="dwlBtn" type="button">Download</button>
-<!--
-<script>
-  document.getElementById("dwlBtn").addEventListener("click", async function () {
-    const fileUrl =
-      "https://raw.githubusercontent.com/Shabani005/Shabani005.github.io/refs/heads/main/README.md";
+    <head>
+        <link rel="stylesheet" href="style.css" />
+    </head>
 
-    try {
-      // Fetch the file as a Blob
-      const response = await fetch(fileUrl);
-      if (!response.ok) throw new Error("Network response was not ok");
+    <body>
+        <h1>Projects</h1>
+            <h2>willrain</h2>
+            <p>
+                NASA data science project, cooked up in 2 days for a hackathon. Predicts rainfall probability given a location and date. 
+            </p>    
 
-      const blob = await response.blob();
+            <h2>cml</h2>
+            <p>
+                Simple "Machine Learning" framework written in C. (Also has python bindings that do not work on windows -> MSVC is bad). Only ships with KNN and Simple Linear Regression for now.
+            </p>
 
-      // Create a temporary object URL for the Blob
-      const url = window.URL.createObjectURL(blob);
+            <h2>render.h</h2>
+            <p>
+                Very Simplistic software rendering library written in C aiming to support as wide of a range of systems as possible (by not depending on C std lib).
+            </p>
 
-      // Create a hidden link and trigger download
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "README.md"; // Suggested filename
-      document.body.appendChild(a);
-      a.click();
+            <h2>nobuild</h2>
+            <p>
+                "build system" / reciper builder for c, with other helpful general purpose and misc utilities that ports useful features from more modern languages.
+            </p>
 
-      // Cleanup
-      a.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("Download failed:", error);
-      alert("Failed to download file.");
-    }
-  });
-</script> -->
-        <div class="nav-links">
-            <a href="#" data-section="home" class="active">Home</a>
-            <a href="#" data-section="projects">Projects</a>
-            <a href="#" data-section="contact">Contact</a>
-        </div>
-    </nav>
-    
-    <div class="page-container">
-        <section id="home" class="section active">
-            <div class="section-content">
-                <h1>Hasan Shabani</h1>
-                <p>Data Scientist and Upcoming Business Analyst</p>
-                <div class="skills-container">
-                    <div class="skill-square" data-language="Python">
-                        <img src="assets/python-logo.png" alt="Python">
-                    </div>
-                    <div class="skill-square" data-language="R">
-                        <img src="assets/r-logo.png" alt="R">
-                    </div>
-                    <div class="skill-square" data-language="SQL">
-                        <img src="assets/sql-logo.png" alt="SQL">
-                    </div>
-                    <div class="skill-square" data-language="Tableau">
-                        <img src="assets/tableau-logo.png" alt="Tableau">
-                    </div>
-                    <div class="skill-square" data-language="Anaconda">
-                        <img src="assets/anaconda-logo.png" alt="Anaconda">
-                    </div>
-                    <div class="skill-square" data-language="Matplotlib">
-                        <img src="assets/matplotlib-logo.png" alt="Matplotlib">
-                    </div>
-                </div>
-                <button class="next-section-btn" data-target="projects">
-                    View Projects
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <polyline points="19 12 12 19 5 12"></polyline>
-                    </svg>
-                </button>
-            </div>
-        </section>
-        
-        <section id="projects" class="section">
-            <div class="section-content">
-                <h2>Projects</h2>
-                <div class="projects-grid">
-                    <div class="project-card">
-                        <h3>Math OCR Texify Wrapper</h3>
-                        <img src="assets/ocr_math.gif" alt="OCR demo" onclick="expandGif(this)">
-                        <p>An inference-based Python OCR wrapper for Texify, enabling efficient mathematical equation recognition and conversion.</p>
-                        <a href="https://github.com/Shabani005/math_ocr" class="project-link">View Project</a>
-                    </div>
-
-                    <div class="project-card">
-                        <h3>Speech-2-Speech Model</h3>
-                        <p>A collaborative project focused on developing advanced speech-to-speech translation capabilities.</p>
-                        <a href="https://github.com/AitchEm-bot/S2S" class="project-link">View Project</a>
-                    </div>
-                </div>
-                <button class="next-section-btn" data-target="contact">
-                    Contact Me
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <polyline points="19 12 12 19 5 12"></polyline>
-                    </svg>
-                </button>
-            </div>
-        </section>
-        
-        <section id="contact" class="section">
-            <div class="section-content">
-                <div class="ide-container">
-                    <div class="ide-header">
-                        <div class="ide-header-left">
-                            <div class="ide-controls">
-                                <span class="control red"></span>
-                                <span class="control yellow"></span>
-                                <span class="control green"></span>
-                            </div>
-                            <div class="ide-title">PowerShell</div>
-                        </div>
-                        <button class="run-button" onclick="window.location.href='mailto:hasan.shabani2005@gmail.com'">
-                            <svg class="run-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                            </svg>
-                            Contact Me
-                        </button>
-                    </div>
-                    <div class="ide-content">
-                        <div class="command-line">
-                            <span class="prompt">PS C:\Users\you></span><span class="command">Send-MailMessage -From "your@email.com" -To "hasan.shabani2005@gmail.com"</span>
-                        </div>
-                    </div>
-                </div>
-                <button class="next-section-btn" data-target="home">
-                    Back to Home
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="19" x2="12" y2="5"></line>
-                        <polyline points="5 12 12 5 19 12"></polyline>
-                    </svg>
-                </button>
-            </div>
-        </section>
-    </div>
-    
-    <div id="gifModal" class="modal" onclick="closeGif()">
-        <img id="expandedGif">
-    </div>
-    
-    <div class="scroll-indicator">
-        <div class="scroll-dot active" data-section="home"></div>
-        <div class="scroll-dot" data-section="projects"></div>
-        <div class="scroll-dot" data-section="contact"></div>
-    </div>
-    
-    <script src="main.js"></script>
-</body>
+            <h2>hlang</h2>
+            <p>
+                Simple programming language VM implemented in C. still very undeveloped but can print hello world and parse basic math functions :)
+            </p>        
+    </body>
 </html>
 
