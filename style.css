@@ -11,6 +11,11 @@
     --my-grey: #565f73;
 }
 
+.header-top {
+    display: flex;
+    align-items: vertical;
+    gap: 3rem;
+}
 
 body {
     font-family: '0xproto', monospace;
