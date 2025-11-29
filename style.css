@@ -22,17 +22,29 @@ body {
     background-color: #181818;
 }
 
+a {
+    color: inherit;
+}
+
+
 h1 {
     color: var(--my-yellow);
 }
+
+/* .highlight { */
+    /* color: inherit; */
+/* } */
 
 h2 {
     color: var(--my-grey);
 }
 
+
 p {
     color: var(--my-green);
 }
+
+
 
 /* a { */
     /* color: inherit; */
