@@ -279,9 +279,9 @@ a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:2px}
 <section class="sec">
   <p class="eyebrow">Limits</p>
   <h2>Where this does not hold</h2>
-  <p class="wide">Two results here go against the idea, and both are in the released data. They also bound what
-     the headline number means: this is what a gate bolted onto a finished model can do, not what the approach
-     is worth in principle.</p>
+  <p class="wide">Two results here go against the idea, and both are in the released data. They bound what the
+     headline number means: this is what a gate bolted onto a finished model can do, not what the approach is
+     worth in principle — a distinction the next two sections take seriously.</p>
   <figure class="fig" style="margin-bottom:26px">
     <svg viewBox="0 0 720 128" class="chart" role="img" aria-label="Accuracy on long-horizon tasks">
 <g class="solid" style="--c:var(--s-base)"><text class="lhname" x="158" y="16" text-anchor="end">No reasoning</text><rect class="bar" x="170" y="0" width="245.7" height="20" rx="3"/><text class="barlab" x="425.7" y="16"><tspan class="strong">73%</tspan> solved · 29,042 tok</text><title>No reasoning: 73.3% of 15 episodes solved, 29,042 tokens each</title></g>
@@ -299,12 +299,10 @@ a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:2px}
       64,212), but full reasoning still wins outright.</figcaption>
   </figure>
   <div class="cols three">
-    <div class="card"><h3>The model was never trained to use a gate</h3>
-      <p>Every number here comes from a model that was pretrained and post-trained to reason on its own, with
-         a gate strapped on afterwards. It was never taught to signal its own uncertainty, to stop early when
-         something else will check it, or to answer differently because a second opinion is coming. A model
-         trained with a decision model in the loop should do better than this — these results are a floor for
-         the idea, not a ceiling.</p></div>
+    <div class="card"><h3>Final answers, not agent steps</h3>
+      <p>The gate is built to judge a finished answer. Applied to each move of an episode it is the wrong
+         shape, as Figure 4 shows, and the veto variant that partly recovers is a different policy rather than
+         a tuning of this one.</p></div>
     <div class="card"><h3>It only pays if the model overthinks</h3>
       <p>The saving tracks the gap between one-shot and reasoning accuracy. Replicated on a local 35B model
          whose one-shot answers already matched its reasoning, the gate cut tokens but bought no accuracy.
@@ -317,15 +315,51 @@ a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:2px}
 </section>
 
 <section class="sec">
-  <p class="eyebrow">What it suggests</p>
-  <h2>Confidence is a cheaper thing to compute than an answer</h2>
-  <p class="wide">The gate works because judging an answer is a much smaller problem than producing one, and a
-     model built for that job does it well enough to route traffic: area under the ROC curve 0.88, against 0.70
-     when the same model grades itself. Everything here is the crude version of that idea — one question, one
-     threshold, no training. The obvious next steps are a model that is pretrained with a decision model in the
-     loop rather than bolted to one afterwards, a gate that routes between model tiers instead of between two
-     settings of one model, and a design for multi-step episodes, where per-step gating is exactly the wrong
-     shape.</p>
+  <p class="eyebrow">Interpretation</p>
+  <h2>Every gap left is a training gap</h2>
+  <p class="wide">The model in this study was pretrained and post-trained to reason alone. It has no way to say
+     "I am unsure", no habit of stopping early because something else will check it, and no experience of being
+     told its answer was rejected. The gate has to work around all three from the outside, with a prompt. Three
+     measurements point at that, rather than at the gate, as what is holding the numbers down:</p>
+  <ol class="steps" style="margin-top:22px">
+    <li><b>The judge is not the bottleneck.</b> The decision model separates correct from incorrect answers at
+        an area under the ROC curve of 0.88 — against 0.70 when the same model is asked to grade itself. It
+        knows which answers are wrong. The loss comes after that, in what the model does about it.</li>
+    <li><b>The model cannot act on a rejection.</b> Told its answer was judged unlikely and asked for a
+        different one, it mostly produces a variation of the same reasoning. In the multi-step replay the gate
+        pushed the model off a good move 47 times and rescued it 18 — the veto signal arrives, and the model
+        has no trained response to it.</li>
+    <li><b>The right answer is often never proposed.</b> An audit of the first version's failures found all
+        eleven were cases where the correct answer appeared in none of the model's attempts. A gate can only
+        pick among the candidates it is handed; producing a genuinely different one on request is a trained
+        behaviour this model does not have.</li>
+  </ol>
+  <p class="wide" style="margin-top:22px">So the headline numbers are what a gate can do <i>despite</i> the
+     model, not with it. Whether training closes the gap is the obvious next experiment, and this study does
+     not answer it — it sets the baseline that experiment would have to beat.</p>
+</section>
+
+<section class="sec">
+  <p class="eyebrow">Next step</p>
+  <h2>Post-train a model to use the gate, then run this benchmark again</h2>
+  <p class="wide">The data needed to try it already exists: this run produced graded records for every
+     question and policy, each carrying the cheap answer, the decision model's probability, whether that
+     answer was right, and what happened after a rejection. That is a supervised signal for three behaviours
+     the model currently lacks.</p>
+  <div class="cols three">
+    <div class="card"><h3>1. Teach it to defer</h3>
+      <p>Train on (question, answer, was-it-correct) so the model emits its own stop-or-escalate signal instead
+         of being judged from outside on every question. The decision model becomes the teacher, not a
+         permanent tax on inference.</p></div>
+    <div class="card"><h3>2. Teach it to revise</h3>
+      <p>Train on the rejection traces — the cases where a second attempt after a low score did and did not
+         recover the answer — so a veto produces a genuinely different approach rather than the same chain of
+         thought in new words.</p></div>
+    <div class="card"><h3>3. Re-run this benchmark unchanged</h3>
+      <p>Same held-out questions, same four policies, same three numbers: accuracy against full reasoning,
+         tokens per question, and the gain over an equal-budget traffic split. If the training hypothesis is
+         right, the gap closes; if it does not, the hypothesis is wrong and the ceiling is real.</p></div>
+  </div>
 </section>
 
 <footer><span>Hasan Shabani</span>
