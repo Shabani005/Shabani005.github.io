@@ -277,66 +277,45 @@ a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:2px}
 </section>
 
 <section class="sec">
-  <p class="eyebrow">Limits</p>
-  <h2>Where this does not hold</h2>
-  <p class="wide">Two results here go against the idea, and both are in the released data. They bound what the
-     headline number means: this is what a gate bolted onto a finished model can do, not what the approach is
-     worth in principle — a distinction the next two sections take seriously.</p>
-  <figure class="fig" style="margin-bottom:26px">
+  <p class="eyebrow">The limitation</p>
+  <h2>The model was never trained to use a gate</h2>
+  <p class="wide">One thing is holding these numbers down, and it is not the gate. The model was pretrained and
+     post-trained to reason alone: it has no way to say "I am unsure", no habit of stopping early because
+     something else will check it, and no experience of being told an answer was rejected. The gate has to work
+     around all three from the outside, through a prompt. Three measurements point there:</p>
+  <ol class="steps" style="margin-top:22px">
+    <li><b>The judge is not the bottleneck.</b> The decision model separates correct from incorrect answers at
+        an area under the ROC curve of 0.88 — against 0.70 when the same model is asked to grade itself. It
+        knows which answers are wrong. What is missing is the model's response to being told.</li>
+    <li><b>The model cannot act on a rejection.</b> Told its answer was judged unlikely and asked for a
+        different one, it mostly returns a variation of the same reasoning. Figure 4 is what that costs when
+        the signal arrives on every step of a task instead of once at the end.</li>
+    <li><b>The right answer is often never proposed.</b> An audit of the first version's failures found all
+        eleven were cases where the correct answer appeared in none of the model's attempts. A gate can only
+        pick among the candidates it is handed.</li>
+  </ol>
+  <figure class="fig" style="margin-top:26px">
     <svg viewBox="0 0 720 128" class="chart" role="img" aria-label="Accuracy on long-horizon tasks">
 <g class="solid" style="--c:var(--s-base)"><text class="lhname" x="158" y="16" text-anchor="end">No reasoning</text><rect class="bar" x="170" y="0" width="245.7" height="20" rx="3"/><text class="barlab" x="425.7" y="16"><tspan class="strong">73%</tspan> solved · 29,042 tok</text><title>No reasoning: 73.3% of 15 episodes solved, 29,042 tokens each</title></g>
 <g class="solid" style="--c:var(--s-ours)"><text class="lhname" x="158" y="46" text-anchor="end">Gate only</text><rect class="bar" x="170" y="30" width="178.7" height="20" rx="3"/><text class="barlab" x="358.7" y="46"><tspan class="strong">53%</tspan> solved · 105,832 tok</text><title>Gate only: 53.3% of 15 episodes solved, 105,832 tokens each</title></g>
 <g class="open" style="--c:var(--s-ours)"><text class="lhname" x="158" y="76" text-anchor="end">Gate per step (veto)</text><rect class="bar" x="170" y="60" width="290.3" height="20" rx="3"/><text class="barlab" x="470.3" y="76"><tspan class="strong">87%</tspan> solved · 33,076 tok</text><title>Gate per step (veto): 86.7% of 15 episodes solved, 33,076 tokens each</title></g>
 <g class="solid" style="--c:var(--s-reason)"><text class="lhname" x="158" y="106" text-anchor="end">Full reasoning</text><rect class="bar" x="170" y="90" width="335.0" height="20" rx="3"/><text class="barlab" x="515.0" y="106"><tspan class="strong">100%</tspan> solved · 64,212 tok</text><title>Full reasoning: 100.0% of 15 episodes solved, 64,212 tokens each</title></g>
 </svg>
-    <figcaption><b>Figure 4.</b> Multi-step agent episodes (15 long-horizon tasks:
-      gridworld navigation, Tower of Hanoi, incident triage). Gating the <i>final answer</i> is the wrong shape
-      here — the gate scores each move, and a single early veto pushes the agent off a sound plan, so
-      <i>gate only</i> drops to 53% while spending more
-      tokens than reasoning. A gate that only vetoes moves it is confident are bad recovers most of the gap
+    <figcaption><b>Figure 4.</b> The same gate applied to every step of a multi-step episode
+      (15 long-horizon tasks: gridworld navigation, Tower of Hanoi, incident
+      triage). A move is vetoed, the model has no trained way to produce a better one, and the plan falls
+      apart — 53% solved against
+      100% for reasoning. Vetoing only moves the judge is confident
+      are bad, which asks less of the model, recovers most of it
       (87% at
       33,076 tokens against
-      64,212), but full reasoning still wins outright.</figcaption>
+      64,212) — the gate's judgement was usable, the model's reply to it
+      was not.</figcaption>
   </figure>
-  <div class="cols three">
-    <div class="card"><h3>Final answers, not agent steps</h3>
-      <p>The gate is built to judge a finished answer. Applied to each move of an episode it is the wrong
-         shape, as Figure 4 shows, and the veto variant that partly recovers is a different policy rather than
-         a tuning of this one.</p></div>
-    <div class="card"><h3>It only pays if the model overthinks</h3>
-      <p>The saving tracks the gap between one-shot and reasoning accuracy. Replicated on a local 35B model
-         whose one-shot answers already matched its reasoning, the gate cut tokens but bought no accuracy.
-         Where reasoning is not wasted, there is nothing to reclaim.</p></div>
-    <div class="card"><h3>One model family, one threshold</h3>
-      <p>The headline run is a single model; the threshold (0.7) was picked on a separate development set and
-         held fixed. A cross-validated sweep put the best global threshold within two points of it, but it is
-         one knob chosen once, not a tuned-per-task policy.</p></div>
-  </div>
-</section>
-
-<section class="sec">
-  <p class="eyebrow">Interpretation</p>
-  <h2>Every gap left is a training gap</h2>
-  <p class="wide">The model in this study was pretrained and post-trained to reason alone. It has no way to say
-     "I am unsure", no habit of stopping early because something else will check it, and no experience of being
-     told its answer was rejected. The gate has to work around all three from the outside, with a prompt. Three
-     measurements point at that, rather than at the gate, as what is holding the numbers down:</p>
-  <ol class="steps" style="margin-top:22px">
-    <li><b>The judge is not the bottleneck.</b> The decision model separates correct from incorrect answers at
-        an area under the ROC curve of 0.88 — against 0.70 when the same model is asked to grade itself. It
-        knows which answers are wrong. The loss comes after that, in what the model does about it.</li>
-    <li><b>The model cannot act on a rejection.</b> Told its answer was judged unlikely and asked for a
-        different one, it mostly produces a variation of the same reasoning. In the multi-step replay the gate
-        pushed the model off a good move 47 times and rescued it 18 — the veto signal arrives, and the model
-        has no trained response to it.</li>
-    <li><b>The right answer is often never proposed.</b> An audit of the first version's failures found all
-        eleven were cases where the correct answer appeared in none of the model's attempts. A gate can only
-        pick among the candidates it is handed; producing a genuinely different one on request is a trained
-        behaviour this model does not have.</li>
-  </ol>
-  <p class="wide" style="margin-top:22px">So the headline numbers are what a gate can do <i>despite</i> the
-     model, not with it. Whether training closes the gap is the obvious next experiment, and this study does
-     not answer it — it sets the baseline that experiment would have to beat.</p>
+  <p class="wide" style="margin-top:24px">So the headline numbers are what a gate does <i>despite</i> the
+     model, and the gain is largest where a model overthinks most — on a model whose one-shot answers already
+     match its reasoning there is nothing to reclaim. Whether training closes the rest of the gap is the next
+     experiment.</p>
 </section>
 
 <section class="sec">
