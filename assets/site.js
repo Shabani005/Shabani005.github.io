@@ -1,9 +1,3 @@
-// Keyboard-driven site: vim-style navigation with a statusline, a ":" command line,
-// "/" search, and live repo stats from GitHub / Codeberg.
-// Other scripts can hook in through window.site and the "site:select" event.
-
-// loaded at the end of <body>, so the page above is already parsed; running straight away
-// (instead of on DOMContentLoaded) gets the statusline in before the first paint
 (() => {
     const nav = document.querySelector(".header-top");
     const tabs = [...nav.querySelectorAll("a")];
@@ -13,8 +7,6 @@
     const cardOf = (li) => (li.classList.contains("card") ? li : li.querySelector(".card"));
     const names = items.map((li) => cardOf(li).querySelector("h2").textContent.trim());
     const visible = () => items.filter((li) => !li.classList.contains("is-filtered-out"));
-
-    /* ---------- selection + statusline + help ---------- */
 
     let sel = -1;
     let mode = "NORMAL";
@@ -39,7 +31,6 @@
         statusEl.querySelector(".pos").textContent = `${at}/${vis.length}`;
     }
 
-    // show a short message in the statusline, e.g. after a yank
     function flash(text) {
         message = text;
         status();
@@ -97,8 +88,6 @@
         if (li && items.indexOf(li) !== sel) select(items.indexOf(li), false);
     });
 
-    /* ---------- command line: ":" commands and "/" search ---------- */
-
     const cmd = document.createElement("div");
     cmd.className = "cmdline";
     cmd.hidden = true;
@@ -147,7 +136,6 @@
         return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
     }
 
-    // wrap matches in <mark>; the stats badge inside <h2> is set aside and put back
     function highlight(el, q) {
         const extra = [...el.querySelectorAll(".repo-stats")];
         extra.forEach((x) => x.remove());
@@ -156,7 +144,6 @@
         if (!q) el.textContent = text;
         else {
             const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
-            // one wrapper span, so the flex <h2> keeps the name as a single item
             el.innerHTML = `<span>${escapeHtml(text).replace(re, (m) => `<mark>${m}</mark>`)}</span>`;
         }
         el.append(...extra);
@@ -216,8 +203,6 @@
         }
     });
 
-    /* ---------- keyboard ---------- */
-
     let lastG = 0;
     document.addEventListener("keydown", (e) => {
         if (e.defaultPrevented || e.target === input || e.ctrlKey || e.metaKey || e.altKey) return;
@@ -247,9 +232,6 @@
 
     status();
 
-    /* ---------- live repo stats ---------- */
-
-    // GitHub's colours, except C, whose #555 would vanish on this background
     const LANG_COLORS = { C: "#a8b9cc", "Jupyter Notebook": "#da5b0b", Rust: "#dea584", JavaScript: "#f1e05a", Python: "#3572a5", Go: "#00add8", "C++": "#f34b7d" };
 
     function ago(iso) {
@@ -271,7 +253,6 @@
     for (const a of document.querySelectorAll("a.card")) {
         const repo = repoOf(a.href);
         if (!repo) continue;
-        // cached for an hour across visits: GitHub allows 60 unauthenticated requests per hour per IP
         const key = `repo:${repo.api}`;
         const cached = JSON.parse(localStorage.getItem(key) || "null");
         const fresh = cached && Date.now() - cached.t < 3600e3;

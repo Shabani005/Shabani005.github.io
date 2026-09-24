@@ -8,8 +8,7 @@
 }
 
 :root {
-    /* nord palette; the names are kept from the original stylesheet */
-    --my-yellow: #ebcb8b;
+        --my-yellow: #ebcb8b;
     --my-green: #a3be8c;
     --my-grey: #565f73;
 
@@ -42,9 +41,6 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* backdrop: nebula clouds (.bg-layer), stars and shooting stars (.bg-canvas, assets/sky.js),
-   and scanlines over everything */
-
 .bg-layer,
 .bg-canvas,
 body::after {
@@ -54,8 +50,6 @@ body::after {
     pointer-events: none;
 }
 
-/* the sky is the same on every page, so it gets its own layer in page transitions instead of
-   crossfading with the content */
 .bg-layer {
     view-transition-name: sky-clouds;
 }
@@ -69,7 +63,6 @@ body::after {
     background: radial-gradient(40vw 30vh at 55% 55%, rgba(163, 190, 140, 0.07), transparent 70%);
 }
 
-/* soft radial gradients; no blur filter, which was slow enough to make the clouds land a frame late */
 .bg-layer::before,
 .bg-layer::after {
     content: "";
@@ -121,8 +114,6 @@ a {
     padding: 0 24px 96px;
 }
 
-/* nav */
-
 .header-top {
     display: flex;
     flex-wrap: wrap;
@@ -154,15 +145,12 @@ a {
     border-bottom-color: var(--my-yellow);
 }
 
-/* list: table-of-contents style, a dotted leader runs from each name to its arrow */
-
 .grid {
     margin: 0;
     padding: 0;
     list-style: none;
 }
 
-/* rows bleed 14px either side so the selected one can be highlighted like vim's cursorline */
 .card {
     position: relative;
     display: block;
@@ -176,8 +164,7 @@ a {
 
 .card h2 {
     display: flex;
-    flex-wrap: wrap; /* repo stats go on their own line under the name */
-    align-items: baseline;
+    flex-wrap: wrap;     align-items: baseline;
     gap: 2px 14px;
     margin: 0 0 6px;
     font-size: 1.1rem;
@@ -186,7 +173,6 @@ a {
     transition: color 0.15s ease;
 }
 
-/* the leader is a row of dots drawn as a background, so it can march on hover */
 .card h2::after {
     content: "";
     flex: 1;
@@ -196,7 +182,6 @@ a {
     transform: translateY(-0.25em);
 }
 
-/* description sits indented beside a thin rule */
 .card p {
     margin: 0 0 0 2px;
     padding-left: 14px;
@@ -206,8 +191,6 @@ a {
     line-height: 1.7;
     color: var(--fg-muted);
 }
-
-/* links: arrow at the end of the leader (external for projects, in-site for research) */
 
 a.card h2 {
     padding-right: 34px;
@@ -231,7 +214,6 @@ a.card:hover::after {
     color: var(--my-yellow);
 }
 
-/* dots turn yellow and march toward the arrow */
 a.card:hover h2::after {
     background-image: radial-gradient(circle, var(--my-yellow) 1.2px, transparent 1.6px);
     animation: march 0.5s linear infinite;
@@ -288,13 +270,6 @@ a.card:focus-visible,
     }
 }
 
-/* ================================================================== */
-/* keyboard-driven features                                           */
-/* ================================================================== */
-
-/* ---------- keyboard selection, statusline, key help (assets/site.js) ---------- */
-
-/* the keyboard-selected item looks like a hovered one */
 .card.is-selected {
     background: color-mix(in srgb, var(--fg) 5%, transparent);
 }
@@ -418,14 +393,11 @@ body {
     color: var(--fg-muted);
 }
 
-/* ---------- command line: ":" commands and "/" search ---------- */
-
 .cmdline {
     position: fixed;
     left: 0;
     right: 0;
-    bottom: 26px; /* sits on top of the statusline */
-    z-index: 45;
+    bottom: 26px;     z-index: 45;
     font-size: 0.85rem;
 }
 
@@ -499,14 +471,10 @@ body {
     border-radius: 2px;
 }
 
-/* ---------- page switches (cross-document view transitions) ---------- */
-
 @view-transition {
     navigation: auto;
 }
 
-/* the page "chrome" is identical on every page, so it gets its own layers and does not animate:
-   no crossfade flicker on the nav, statusline or sky */
 .header-top {
     view-transition-name: site-nav;
 }
@@ -515,7 +483,6 @@ body {
     view-transition-name: statusline;
 }
 
-/* the current tab's underline is its own element (assets/nav.js), so only the line glides */
 .header-top {
     position: relative;
 }
@@ -524,14 +491,10 @@ body {
     border-bottom-color: transparent;
 }
 
-/* a softly lit block behind the current tab, with the yellow line along its bottom;
-   --tab-h is the tab's height, set by nav.js */
 .tab-line {
     position: absolute;
     bottom: -1px;
-    /* width is set to the tab's width by nav.js; content-box so the 12px of padding either side is
-       added around it (the rest of the site uses border-box), which centres the tab in the block */
-    box-sizing: content-box;
+        box-sizing: content-box;
     height: calc(var(--tab-h, 40px) + 8px);
     margin-left: -12px;
     padding: 0 12px;
@@ -567,13 +530,11 @@ main {
     opacity: 0;
 }
 
-/* the yellow underline glides to its new place */
 ::view-transition-group(tab-line) {
     animation-duration: 0.3s;
     animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
-/* the list: keep both snapshots at their natural size, anchored to the top, while the box resizes */
 ::view-transition-old(page-list),
 ::view-transition-new(page-list) {
     height: 100%;
@@ -586,7 +547,6 @@ main {
     animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
-/* old list fades out fast, new list rises in */
 ::view-transition-old(page-list) {
     animation: vt-out 0.12s ease-out both;
 }
@@ -607,8 +567,6 @@ main {
         transform: translateY(12px);
     }
 }
-
-/* ---------- live language / stars / last update from GitHub and Codeberg ---------- */
 
 .card h2::after {
     order: 1;
@@ -647,10 +605,6 @@ main {
     }
 }
 
-/* ---------- README pane, line numbers, link hints (assets/features.js) ---------- */
-
-/* ---------- numbers: relative line numbers in a gutter ---------- */
-
 .grid > li {
     position: relative;
 }
@@ -677,27 +631,21 @@ main {
     }
 }
 
-/* ---------- preview: README pane beside the list (wide screens only) ---------- */
-
 .readme-pane {
     display: none;
 }
 
 @media (min-width: 1024px) {
-    /* every page shares this frame, so the nav and the list sit in the same place on all of them;
-       the extra left padding leaves room for the line-number gutter */
-    .page {
+        .page {
         max-width: 1520px;
         padding-left: 76px;
     }
 
-    /* the list column; descriptions wrap at 72ch so it never needs more than this */
-    .grid {
+        .grid {
         max-width: 680px;
     }
 
-    /* on Projects the README pane takes the rest of the width */
-    html.has-readme-pane main {
+        html.has-readme-pane main {
         display: grid;
         grid-template-columns: minmax(0, 680px) minmax(300px, 1fr);
         gap: clamp(28px, 3.5vw, 48px);
@@ -709,8 +657,7 @@ main {
         top: 20px;
         display: flex;
         flex-direction: column;
-        max-height: calc(100vh - 64px); /* features.js tightens this to the space actually left on screen */
-        margin-top: 16px;
+        max-height: calc(100vh - 64px);         margin-top: 16px;
         border: 1px solid var(--line);
         border-radius: 6px;
         background: color-mix(in srgb, var(--bg) 88%, #000);
@@ -741,7 +688,6 @@ main {
     color: var(--fg);
 }
 
-/* the README itself, rendered from markdown */
 .readme-body {
     padding: 4px 18px 20px;
     overflow: auto;
@@ -845,7 +791,6 @@ main {
     color: var(--fg-dim);
 }
 
-/* GitHub alerts: > [!NOTE], [!TIP], [!IMPORTANT], [!WARNING], [!CAUTION] */
 .readme-body .md-alert {
     --alert: var(--fg-dim);
     padding: 8px 12px;
@@ -906,8 +851,6 @@ main {
     color: var(--fg-dim);
 }
 
-/* ---------- hints: letter labels for following links ---------- */
-
 .link-hint {
     position: absolute;
     z-index: 60;
@@ -925,8 +868,6 @@ main {
 .link-hint.is-dim {
     opacity: 0.25;
 }
-
-/* ---------- more below: "↓3" at the list's right edge while entries are hidden (features.js) ---------- */
 
 .more-below {
     display: none;

@@ -1,7 +1,3 @@
-// More keyboard features on top of assets/site.js: README preview pane, relative line numbers,
-// link hints (f) and yank (y).
-
-// block scope: this file shares the global scope with the other page scripts
 {
     const root = document.documentElement;
 
@@ -9,14 +5,11 @@
         const site = window.site;
         const { items, names, cardOf } = site;
 
-        // list the extra keys in the "?" help
         document.querySelector(".keys-help dl").insertAdjacentHTML(
             "beforeend",
             '<dt>f</dt><dd>follow a link (hints)</dd>' +
                 '<dt>y</dt><dd>yank link of selected item</dd>',
         );
-
-        /* ---------- numbers: vim's relativenumber ---------- */
 
         function numbers() {
             const sel = site.selected();
@@ -28,9 +21,6 @@
             });
         }
 
-        /* ---------- preview: README pane for the selected project ---------- */
-
-        // indices of the items that link to a GitHub / Codeberg repo
         const repoItems = items.map((li, i) => i).filter((i) => cardOf(items[i]).tagName === "A" && site.repoOf(cardOf(items[i]).href));
         let pane = null;
         let shown = -1;
@@ -44,8 +34,6 @@
             document.querySelector("main").append(pane);
             root.classList.add("has-readme-pane");
 
-            // fit the pane between its current top edge and the statusline, so the whole
-            // README box stays on screen at any scroll position (it starts lower at the top of the page)
             let fitQueued = false;
             const fit = () => {
                 fitQueued = false;
@@ -62,7 +50,6 @@
             fit();
         }
 
-        // marked + DOMPurify are only needed here, so load them on demand
         let renderer = null;
         function loadRenderer() {
             if (renderer) return renderer;
@@ -79,7 +66,6 @@
             return renderer;
         }
 
-        // where a README's relative links and images point to
         function repoBases(repo, card) {
             if (repo.host === "github") {
                 return {
@@ -125,7 +111,6 @@
                 if (!absolute.test(src)) img.src = new URL(src.replace(/^\//, ""), bases.raw).href;
                 img.loading = "lazy";
             }
-            // GitHub alerts ("> [!WARNING]" etc.), which marked leaves as plain blockquotes
             for (const quote of tpl.content.querySelectorAll("blockquote")) {
                 const first = quote.firstElementChild;
                 const text = first && first.firstChild;
@@ -150,8 +135,6 @@
             return tpl.content;
         }
 
-        // shows the selected project; with nothing (or a non-repo item) selected it keeps the last one,
-        // starting with the first project, so the pane is never empty
         async function preview() {
             if (!pane) return;
             const sel = site.selected();
@@ -165,8 +148,6 @@
             head.textContent = `${repo.owner}/${repo.name}`;
             head.href = bases.home;
             const body = pane.querySelector(".readme-body");
-            // the finished HTML is cached per session, so revisiting (or switching back to this page)
-            // shows it immediately, without loading the markdown renderer again
             const htmlKey = `readme-html:${repo.host}/${repo.owner}/${repo.name}`;
             const cachedHtml = sessionStorage.getItem(htmlKey);
             if (cachedHtml !== null) {
@@ -184,8 +165,6 @@
             body.scrollTop = 0;
         }
 
-        /* ---------- yank: copy the selected item's link ---------- */
-
         async function yank() {
             const sel = site.selected();
             if (sel < 0) {
@@ -198,7 +177,6 @@
                 await navigator.clipboard.writeText(url);
                 site.flash(`yanked ${url}`);
             } catch {
-                // older copy path for when the async clipboard API is blocked (e.g. file://)
                 const t = document.createElement("textarea");
                 t.value = url;
                 t.style.cssText = "position:fixed;opacity:0";
@@ -209,8 +187,6 @@
                 site.flash(ok ? `yanked ${url}` : "clipboard not available here");
             }
         }
-
-        /* ---------- hints: press f, then a letter to follow a link ---------- */
 
         const LETTERS = "asdfghjklqwertyuiopzxcvbnm";
         let hints = null;
@@ -241,8 +217,6 @@
             hints.marks.forEach((h) => h.m.remove());
             hints = null;
         }
-
-        /* ---------- keys (capture phase, so they run before site.js) ---------- */
 
         addEventListener(
             "keydown",
@@ -282,10 +256,7 @@
             numbers();
             preview();
         });
-        // search changes which lines are visible, so renumber after each keystroke in the command line
         document.addEventListener("input", numbers);
-
-        /* ---------- more below: "↓3" at the list's right edge while entries are hidden ---------- */
 
         const status = document.querySelector(".statusline");
         const more = document.createElement("button");
@@ -300,14 +271,11 @@
         function moreBelow() {
             const bottom = innerHeight - (status?.offsetHeight || 0);
             const vis = items.filter((li) => !li.classList.contains("is-filtered-out"));
-            // an entry counts as hidden when its name is below the visible area
             const hidden = vis.filter((li) => li.querySelector("h2").getBoundingClientRect().top > bottom - 20);
             firstHidden = hidden[0] || null;
             root.classList.toggle("has-more-below", hidden.length > 0);
             if (!hidden.length) return;
             more.querySelector("b").textContent = hidden.length;
-            // right-aligned with the list (under the column of arrows), just below the last visible
-            // entry, and always clear of the statusline
             const list = document.querySelector(".grid").getBoundingClientRect();
             const lastRule = vis.filter((li) => !hidden.includes(li)).at(-1)?.querySelector("p")?.getBoundingClientRect();
             const lowest = bottom - more.offsetHeight - 10;
@@ -323,7 +291,6 @@
         moreBelow();
     };
 
-    // loaded right after site.js at the end of <body>, so window.site is normally ready already
     if (window.site) run();
     else document.addEventListener("site:ready", run);
 }

@@ -1,15 +1,9 @@
-// Background sky: a twinkling star field with the occasional shooting star, drawn on a canvas
-// in front of soft nebula clouds (the clouds are CSS on .bg-layer, see style.css).
-
-// block scope: this file shares the global scope with the other page scripts
 {
     const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const SNOW = "216, 222, 233"; // nord snow
-    const WARM = "235, 203, 139"; // nord yellow
+    const SNOW = "216, 222, 233";
+    const WARM = "235, 203, 139";
     const rand = (a, b) => a + Math.random() * (b - a);
 
-    // the sky has to look the same on every page, so switching pages doesn't swap it out:
-    // stars come from a fixed seed, and twinkling / cloud drift follow the wall clock
     function seeded(seed) {
         return () => {
             seed = (seed + 0x6d2b79f5) | 0;
@@ -23,7 +17,6 @@
     const start = () => {
         const layer = document.createElement("div");
         layer.className = "bg-layer";
-        // start the cloud drift where it would be by now (periods: 2 x 40s and 2 x 52s, alternating)
         layer.style.setProperty("--drift-a", `${-(clock() % 80)}s`);
         layer.style.setProperty("--drift-b", `${-(clock() % 104)}s`);
         const canvas = document.createElement("canvas");
@@ -65,7 +58,6 @@
             }
         };
 
-        // a streak heading down-left with a fading tail, one every 2.5-6s
         const drawMeteor = (now) => {
             if (!meteor && now > nextMeteor) {
                 meteor = { x: rand(w * 0.3, w * 1.05), y: rand(-40, h * 0.35), t: 0, len: rand(120, 220), speed: rand(9, 14) };
@@ -90,10 +82,9 @@
             }
         };
 
-        // draw the first frame right away, so the stars are in the page's very first paint
         drawStars();
         if (reduceMotion) {
-            addEventListener("resize", drawStars); // one still frame, no shooting stars
+            addEventListener("resize", drawStars);
             return;
         }
 
@@ -109,6 +100,5 @@
         requestAnimationFrame(tick);
     };
 
-    // loaded at the end of <body>, so document.body exists; start before the first paint
     start();
 }

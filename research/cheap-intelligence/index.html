@@ -13,7 +13,6 @@ url('../../assets/0xProtoNerdFont-Regular.ttf') format('truetype');font-weight:n
 *{box-sizing:border-box}
 body{margin:0;background-color:var(--bg);color:var(--ink);font:400 15px/1.7 '0xProto',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
 -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
-/* same sky as the rest of the site (style.css + assets/sky.js): nebula clouds, stars, scanlines */
 .bg-layer,.bg-canvas,body:after{position:fixed;inset:0;z-index:-1;pointer-events:none}
 body:after{content:""}
 .bg-layer{overflow:hidden;background:radial-gradient(40vw 30vh at 55% 55%,rgba(163,190,140,.07),transparent 70%)}
@@ -27,14 +26,12 @@ body:after{background-image:repeating-linear-gradient(to bottom,rgba(236,239,244
 b,strong{font-weight:normal;color:var(--ink)}
 .wrap{max-width:920px;margin:0 auto;padding:0 24px 96px}
 @media(max-width:600px){.wrap{padding:0 18px 64px}}
-/* same frame as the other pages (style.css): nav and content start at the same place */
 @media(min-width:1024px){.wrap{max-width:1520px;padding-left:76px}.wrap>:not(.header-top){max-width:920px}}
 .header-top{padding-top:40px;display:flex;flex-wrap:wrap;align-items:flex-end;gap:0 36px;margin-bottom:44px;border-bottom:1px solid var(--line)}
 .header-top a{display:block;padding-bottom:14px;margin-bottom:-1px;border-bottom:2px solid transparent;color:var(--dim);
 font-size:1.5rem;text-decoration:none;transition:color .15s ease,border-color .15s ease}
 .header-top a:hover{color:var(--ink);border-bottom-color:#4c566a}
 .header-top a[aria-current="page"]{color:var(--accent);border-bottom-color:var(--accent)}
-/* animated tab changes, same as the rest of the site (style.css) */
 @view-transition{navigation:auto}
 .header-top{position:relative}.header-top a[aria-current="page"]{border-bottom-color:transparent}
 .tab-line{position:absolute;bottom:-1px;box-sizing:content-box;height:calc(var(--tab-h,40px) + 8px);margin-left:-12px;padding:0 12px;border-bottom:2px solid var(--accent);
@@ -238,7 +235,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius
      re-run the same tasks.</p>
 </section>
 </main>
-<script src="../../assets/nav.js?v=29"></script>
-<script src="../../assets/sky.js?v=29"></script>
+<script src="../../assets/nav.js?v=31"></script>
+<script src="../../assets/sky.js?v=31"></script>
 <div id="page-ready"></div>
 </body></html>
