@@ -1,52 +1,959 @@
 @font-face {
   font-family: '0xProto';
-  src: url('./assets/0xProtoNerdFont-Regular.ttf') format('truetype');
+  src: url('./assets/0xProto-Regular.woff2') format('woff2'),
+       url('./assets/0xProtoNerdFont-Regular.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 
 :root {
-    --my-yellow: #ffdd33;
-    --my-green: #73c936;
+    /* nord palette; the names are kept from the original stylesheet */
+    --my-yellow: #ebcb8b;
+    --my-green: #a3be8c;
     --my-grey: #565f73;
+
+    --bg: #2e3440;
+    --line: #3b4252;
+    --line-strong: #4c566a;
+    --fg: #eceff4;
+    --fg-muted: #c2c9d6;
+    --fg-dim: #818a9c;
+    --dot: rgba(236, 239, 244, 0.06);
+
+    color-scheme: dark;
+    scrollbar-color: var(--line-strong) var(--bg);
 }
 
-.header-top {
-    display: flex;
-    align-items: vertical;
-    gap: 3rem;
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
 }
 
 body {
-    font-family: '0xproto', monospace;
-    background-color: #181818;
+    margin: 0;
+    min-height: 100vh;
+    font-family: '0xProto', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    background-color: var(--bg);
+    color: var(--fg);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* backdrop: nebula clouds (.bg-layer), stars and shooting stars (.bg-canvas, assets/sky.js),
+   and scanlines over everything */
+
+.bg-layer,
+.bg-canvas,
+body::after {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* the sky is the same on every page, so it gets its own layer in page transitions instead of
+   crossfading with the content */
+.bg-layer {
+    view-transition-name: sky-clouds;
+}
+
+.bg-canvas {
+    view-transition-name: sky-stars;
+}
+
+.bg-layer {
+    overflow: hidden;
+    background: radial-gradient(40vw 30vh at 55% 55%, rgba(163, 190, 140, 0.07), transparent 70%);
+}
+
+/* soft radial gradients; no blur filter, which was slow enough to make the clouds land a frame late */
+.bg-layer::before,
+.bg-layer::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+}
+
+.bg-layer::before {
+    top: -10vh;
+    right: -5vw;
+    width: 60vw;
+    height: 60vh;
+    background: radial-gradient(closest-side, rgba(180, 142, 173, 0.26), rgba(180, 142, 173, 0.1) 50%, transparent);
+    animation: nebula-drift 40s ease-in-out var(--drift-a, 0s) infinite alternate;
+}
+
+.bg-layer::after {
+    bottom: -15vh;
+    left: -10vw;
+    width: 65vw;
+    height: 65vh;
+    background: radial-gradient(closest-side, rgba(94, 129, 172, 0.28), rgba(94, 129, 172, 0.1) 50%, transparent);
+    animation: nebula-drift 52s ease-in-out var(--drift-b, 0s) infinite alternate-reverse;
+}
+
+@keyframes nebula-drift {
+    to {
+        transform: translate(-6vw, 5vh) scale(1.12);
+    }
+}
+
+body::after {
+    content: "";
+    background-image: repeating-linear-gradient(to bottom, var(--dot) 0 1px, transparent 1px 4px);
+}
+
+::selection {
+    background: var(--my-yellow);
+    color: var(--bg);
 }
 
 a {
     color: inherit;
 }
 
+.page {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 0 24px 96px;
+}
 
-h1 {
+/* nav */
+
+.header-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0 36px;
+    padding-top: 40px;
+    margin-bottom: 36px;
+    border-bottom: 1px solid var(--line);
+}
+
+.header-top a {
+    display: block;
+    padding-bottom: 14px;
+    margin-bottom: -1px;
+    border-bottom: 2px solid transparent;
+    color: var(--fg-dim);
+    font-size: 1.5rem;
+    text-decoration: none;
+    transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.header-top a:hover {
+    color: var(--fg);
+    border-bottom-color: var(--line-strong);
+}
+
+.header-top a[aria-current="page"] {
+    color: var(--my-yellow);
+    border-bottom-color: var(--my-yellow);
+}
+
+/* list: table-of-contents style, a dotted leader runs from each name to its arrow */
+
+.grid {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* rows bleed 14px either side so the selected one can be highlighted like vim's cursorline */
+.card {
+    position: relative;
+    display: block;
+    margin: 0 -14px;
+    padding: 16px 14px 18px;
+    border-radius: 4px;
+    color: inherit;
+    text-decoration: none;
+    transition: background-color 0.12s ease;
+}
+
+.card h2 {
+    display: flex;
+    flex-wrap: wrap; /* repo stats go on their own line under the name */
+    align-items: baseline;
+    gap: 2px 14px;
+    margin: 0 0 6px;
+    font-size: 1.1rem;
+    font-weight: normal;
+    color: var(--my-green);
+    transition: color 0.15s ease;
+}
+
+/* the leader is a row of dots drawn as a background, so it can march on hover */
+.card h2::after {
+    content: "";
+    flex: 1;
+    min-width: 40px;
+    height: 4px;
+    background: radial-gradient(circle, var(--line-strong) 1.2px, transparent 1.6px) 0 50% / 8px 4px repeat-x;
+    transform: translateY(-0.25em);
+}
+
+/* description sits indented beside a thin rule */
+.card p {
+    margin: 0 0 0 2px;
+    padding-left: 14px;
+    border-left: 2px solid var(--line-strong);
+    max-width: 72ch;
+    font-size: 0.85rem;
+    line-height: 1.7;
+    color: var(--fg-muted);
+}
+
+/* links: arrow at the end of the leader (external for projects, in-site for research) */
+
+a.card h2 {
+    padding-right: 34px;
+}
+
+a.card::after {
+    content: "\2197";
+    position: absolute;
+    top: 16px;
+    right: 14px;
+    color: var(--fg-dim);
+    transition: color 0.15s ease, transform 0.15s ease;
+}
+
+a.card.study::after {
+    content: "\2192";
+}
+
+a.card:hover h2,
+a.card:hover::after {
     color: var(--my-yellow);
 }
 
-/* .highlight { */
-    /* color: inherit; */
-/* } */
-
-h2 {
-    color: var(--my-grey);
+/* dots turn yellow and march toward the arrow */
+a.card:hover h2::after {
+    background-image: radial-gradient(circle, var(--my-yellow) 1.2px, transparent 1.6px);
+    animation: march 0.5s linear infinite;
 }
 
+@keyframes march {
+    to {
+        background-position: 8px 50%;
+    }
+}
 
-p {
+a.card:hover::after {
+    transform: translate(2px, -2px);
+}
+
+a.card.study:hover::after {
+    transform: translateX(3px);
+}
+
+a.card:focus-visible,
+.header-top a:focus-visible {
+    outline: 2px solid var(--my-yellow);
+    outline-offset: 3px;
+    border-radius: 4px;
+}
+
+@media (max-width: 600px) {
+    .page {
+        padding: 0 18px 64px;
+    }
+
+    .header-top {
+        gap: 0 20px;
+        padding-top: 24px;
+        margin-bottom: 24px;
+    }
+
+    .header-top a {
+        font-size: 1.05rem;
+        padding-bottom: 12px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation: none !important;
+        transition: none !important;
+    }
+
+    a.card:hover::after {
+        transform: none;
+    }
+}
+
+/* ================================================================== */
+/* keyboard-driven features                                           */
+/* ================================================================== */
+
+/* ---------- keyboard selection, statusline, key help (assets/site.js) ---------- */
+
+/* the keyboard-selected item looks like a hovered one */
+.card.is-selected {
+    background: color-mix(in srgb, var(--fg) 5%, transparent);
+}
+
+.card.is-selected h2,
+a.card.is-selected::after {
+    color: var(--my-yellow);
+}
+
+.card.is-selected h2::after {
+    background-image: radial-gradient(circle, var(--my-yellow) 1.2px, transparent 1.6px);
+    animation: march 0.5s linear infinite;
+}
+
+.card.is-selected p {
+    border-left-color: var(--my-yellow);
+}
+
+body {
+    padding-bottom: 28px;
+}
+
+.statusline {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    display: flex;
+    align-items: stretch;
+    height: 26px;
+    font-size: 0.75rem;
+    line-height: 26px;
+    background: #3b4252;
+    color: var(--fg-muted);
+    white-space: nowrap;
+}
+
+.statusline > span {
+    padding: 0 12px;
+}
+
+.statusline .mode {
+    font-weight: normal;
+    color: var(--bg);
+    background: var(--my-green);
+    letter-spacing: 0.06em;
+}
+
+.statusline .mode[data-mode="COMMAND"],
+.statusline .mode[data-mode="SEARCH"] {
+    background: var(--my-yellow);
+}
+
+.statusline .path {
+    background: #434c5e;
+    color: var(--fg);
+}
+
+.statusline .fill {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.statusline .pos {
+    background: #434c5e;
+    color: var(--fg);
+}
+
+.statusline .hint {
+    color: var(--fg-dim);
+}
+
+.keys-help {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: grid;
+    place-items: center;
+    background: rgba(20, 23, 30, 0.6);
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+}
+
+.keys-help[hidden] {
+    display: none;
+}
+
+.keys-help-box {
+    min-width: min(360px, 90vw);
+    padding: 20px 24px;
+    background: var(--bg);
+    border: 1px solid var(--line-strong);
+    border-radius: 8px;
+    box-shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.6);
+    font-size: 0.85rem;
+}
+
+.keys-help-box h3 {
+    margin: 0 0 12px;
+    font-weight: normal;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    color: var(--fg-dim);
+}
+
+.keys-help-box dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 6px 18px;
+    margin: 0;
+}
+
+.keys-help-box dt {
+    color: var(--my-yellow);
+}
+
+.keys-help-box dd {
+    margin: 0;
+    color: var(--fg-muted);
+}
+
+/* ---------- command line: ":" commands and "/" search ---------- */
+
+.cmdline {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 26px; /* sits on top of the statusline */
+    z-index: 45;
+    font-size: 0.85rem;
+}
+
+.cmdline[hidden] {
+    display: none;
+}
+
+.cmdline-row {
+    display: flex;
+    align-items: center;
+    height: 30px;
+    padding: 0 12px;
+    background: color-mix(in srgb, var(--bg) 80%, #000);
+    border-top: 1px solid var(--line-strong);
+}
+
+.cmdline-prefix {
+    color: var(--my-yellow);
+}
+
+.cmdline input {
+    flex: 1;
+    min-width: 0;
+    margin-left: 2px;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    font: inherit;
+    color: var(--fg);
+    caret-color: var(--my-yellow);
+}
+
+.cmdline ul {
+    margin: 0;
+    padding: 4px 0;
+    list-style: none;
+    background: color-mix(in srgb, var(--bg) 90%, #000);
+    border-top: 1px solid var(--line);
+}
+
+.cmdline ul:empty {
+    display: none;
+}
+
+.cmdline li {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 3px 14px;
+    color: var(--fg-muted);
+    cursor: pointer;
+}
+
+.cmdline li .kind {
+    color: var(--fg-dim);
+}
+
+.cmdline li.is-active {
+    background: var(--line);
+    color: var(--my-yellow);
+}
+
+.grid > li.is-filtered-out {
+    display: none;
+}
+
+.card mark {
+    background: color-mix(in srgb, var(--my-yellow) 35%, transparent);
+    color: inherit;
+    border-radius: 2px;
+}
+
+/* ---------- page switches (cross-document view transitions) ---------- */
+
+@view-transition {
+    navigation: auto;
+}
+
+/* the page "chrome" is identical on every page, so it gets its own layers and does not animate:
+   no crossfade flicker on the nav, statusline or sky */
+.header-top {
+    view-transition-name: site-nav;
+}
+
+.statusline {
+    view-transition-name: statusline;
+}
+
+/* the current tab's underline is its own element (assets/nav.js), so only the line glides */
+.header-top {
+    position: relative;
+}
+
+.header-top a[aria-current="page"] {
+    border-bottom-color: transparent;
+}
+
+/* a softly lit block behind the current tab, with the yellow line along its bottom;
+   --tab-h is the tab's height, set by nav.js */
+.tab-line {
+    position: absolute;
+    bottom: -1px;
+    /* width is set to the tab's width by nav.js; content-box so the 12px of padding either side is
+       added around it (the rest of the site uses border-box), which centres the tab in the block */
+    box-sizing: content-box;
+    height: calc(var(--tab-h, 40px) + 8px);
+    margin-left: -12px;
+    padding: 0 12px;
+    border-bottom: 2px solid var(--my-yellow);
+    border-radius: 6px 6px 0 0;
+    background: color-mix(in srgb, var(--my-yellow) 12%, transparent);
+    view-transition-name: tab-line;
+}
+
+main {
+    view-transition-name: page-list;
+}
+
+::view-transition-group(root),
+::view-transition-group(site-nav),
+::view-transition-group(statusline),
+::view-transition-group(sky-clouds),
+::view-transition-group(sky-stars),
+::view-transition-old(root),
+::view-transition-new(root),
+::view-transition-new(site-nav),
+::view-transition-new(statusline),
+::view-transition-new(sky-clouds),
+::view-transition-new(sky-stars) {
+    animation: none;
+}
+
+::view-transition-old(site-nav),
+::view-transition-old(statusline),
+::view-transition-old(sky-clouds),
+::view-transition-old(sky-stars) {
+    animation: none;
+    opacity: 0;
+}
+
+/* the yellow underline glides to its new place */
+::view-transition-group(tab-line) {
+    animation-duration: 0.3s;
+    animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* the list: keep both snapshots at their natural size, anchored to the top, while the box resizes */
+::view-transition-old(page-list),
+::view-transition-new(page-list) {
+    height: 100%;
+    object-fit: none;
+    object-position: top left;
+}
+
+::view-transition-group(page-list) {
+    animation-duration: 0.3s;
+    animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* old list fades out fast, new list rises in */
+::view-transition-old(page-list) {
+    animation: vt-out 0.12s ease-out both;
+}
+
+::view-transition-new(page-list) {
+    animation: vt-in 0.3s cubic-bezier(0.2, 0.7, 0.2, 1) 0.06s both;
+}
+
+@keyframes vt-out {
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes vt-in {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+}
+
+/* ---------- live language / stars / last update from GitHub and Codeberg ---------- */
+
+.card h2::after {
+    order: 1;
+}
+
+.repo-stats {
+    order: 3;
+    flex-basis: 100%;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    color: var(--fg-dim);
+    white-space: nowrap;
+    animation: enter-stats 0.4s ease both;
+}
+
+.repo-stats .lang-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--lang, var(--fg-dim));
+}
+
+@keyframes enter-stats {
+    from {
+        opacity: 0;
+    }
+}
+
+@media (max-width: 600px) {
+    .statusline .fill,
+    .statusline .hint,
+    .repo-stats .when {
+        display: none;
+    }
+}
+
+/* ---------- README pane, line numbers, link hints (assets/features.js) ---------- */
+
+/* ---------- numbers: relative line numbers in a gutter ---------- */
+
+.grid > li {
+    position: relative;
+}
+
+.grid > li::before {
+    content: attr(data-rn);
+    position: absolute;
+    top: 18px;
+    left: -52px;
+    width: 36px;
+    text-align: right;
+    font-size: 0.8rem;
+    color: var(--fg-dim);
+    font-variant-numeric: tabular-nums;
+}
+
+.grid > li.is-current-line::before {
+    color: var(--my-yellow);
+}
+
+@media (max-width: 1059px) {
+    .grid > li::before {
+        content: none;
+    }
+}
+
+/* ---------- preview: README pane beside the list (wide screens only) ---------- */
+
+.readme-pane {
+    display: none;
+}
+
+@media (min-width: 1024px) {
+    /* every page shares this frame, so the nav and the list sit in the same place on all of them;
+       the extra left padding leaves room for the line-number gutter */
+    .page {
+        max-width: 1520px;
+        padding-left: 76px;
+    }
+
+    /* the list column; descriptions wrap at 72ch so it never needs more than this */
+    .grid {
+        max-width: 680px;
+    }
+
+    /* on Projects the README pane takes the rest of the width */
+    html.has-readme-pane main {
+        display: grid;
+        grid-template-columns: minmax(0, 680px) minmax(300px, 1fr);
+        gap: clamp(28px, 3.5vw, 48px);
+        align-items: start;
+    }
+
+    .readme-pane {
+        position: sticky;
+        top: 20px;
+        display: flex;
+        flex-direction: column;
+        max-height: calc(100vh - 64px); /* features.js tightens this to the space actually left on screen */
+        margin-top: 16px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: color-mix(in srgb, var(--bg) 88%, #000);
+        overflow: hidden;
+    }
+}
+
+.readme-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--line);
+    font-size: 0.75rem;
+    color: var(--fg-dim);
+}
+
+.readme-file {
+    color: var(--my-yellow);
+}
+
+.readme-repo {
+    color: var(--fg-dim);
+    text-decoration: none;
+}
+
+.readme-repo:hover {
+    color: var(--fg);
+}
+
+/* the README itself, rendered from markdown */
+.readme-body {
+    padding: 4px 18px 20px;
+    overflow: auto;
+    scrollbar-width: thin;
+    overflow-wrap: anywhere;
+    font-size: 0.8rem;
+    line-height: 1.65;
+    color: var(--fg-muted);
+}
+
+.readme-body > :first-child {
+    margin-top: 14px;
+}
+
+.readme-body h1,
+.readme-body h2,
+.readme-body h3,
+.readme-body h4 {
+    margin: 1.4em 0 0.5em;
+    font-weight: normal;
+    line-height: 1.3;
     color: var(--my-green);
 }
 
+.readme-body h1 {
+    font-size: 1.25rem;
+    padding-bottom: 0.35em;
+    border-bottom: 1px solid var(--line);
+}
 
+.readme-body h2 {
+    font-size: 1.05rem;
+}
 
-/* a { */
-    /* color: inherit; */
-    /* text-decoration: none; */
-/* } */
+.readme-body h3,
+.readme-body h4 {
+    font-size: 0.9rem;
+}
+
+.readme-body p,
+.readme-body ul,
+.readme-body ol,
+.readme-body pre,
+.readme-body blockquote,
+.readme-body table {
+    margin: 0 0 0.9em;
+}
+
+.readme-body ul,
+.readme-body ol {
+    padding-left: 1.4em;
+}
+
+.readme-body li::marker {
+    color: var(--fg-dim);
+}
+
+.readme-body li > ul,
+.readme-body li > ol,
+.readme-body li > pre {
+    margin: 0.3em 0;
+}
+
+.readme-body a {
+    color: var(--my-yellow);
+    text-decoration: none;
+}
+
+.readme-body a:hover {
+    text-decoration: underline;
+}
+
+.readme-body code {
+    padding: 0.1em 0.35em;
+    border-radius: 3px;
+    background: var(--line);
+    color: #88c0d0;
+    font: inherit;
+    font-size: 0.95em;
+}
+
+.readme-body pre {
+    padding: 10px 12px;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--bg) 70%, #000);
+    line-height: 1.55;
+}
+
+.readme-body pre code {
+    padding: 0;
+    background: none;
+    white-space: pre;
+}
+
+.readme-body blockquote {
+    padding-left: 12px;
+    border-left: 2px solid var(--line-strong);
+    color: var(--fg-dim);
+}
+
+/* GitHub alerts: > [!NOTE], [!TIP], [!IMPORTANT], [!WARNING], [!CAUTION] */
+.readme-body .md-alert {
+    --alert: var(--fg-dim);
+    padding: 8px 12px;
+    border-left-color: var(--alert);
+    border-radius: 0 4px 4px 0;
+    background: color-mix(in srgb, var(--alert) 8%, transparent);
+    color: var(--fg-muted);
+}
+
+.readme-body .md-alert > :last-child {
+    margin-bottom: 0;
+}
+
+.readme-body .md-alert-title {
+    margin-bottom: 0.3em;
+    color: var(--alert);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.72rem;
+}
+
+.readme-body .md-alert-note { --alert: #88c0d0; }
+.readme-body .md-alert-tip { --alert: #a3be8c; }
+.readme-body .md-alert-important { --alert: #b48ead; }
+.readme-body .md-alert-warning { --alert: #ebcb8b; }
+.readme-body .md-alert-caution { --alert: #bf616a; }
+
+.readme-body hr {
+    margin: 1.2em 0;
+    border: 0;
+    border-top: 1px solid var(--line);
+}
+
+.readme-body img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
+
+.readme-body table {
+    border-collapse: collapse;
+}
+
+.readme-body th,
+.readme-body td {
+    padding: 4px 10px;
+    border: 1px solid var(--line);
+}
+
+.readme-body strong {
+    font-weight: normal;
+    color: var(--fg);
+}
+
+.md-empty {
+    display: block;
+    margin-top: 14px;
+    color: var(--fg-dim);
+}
+
+/* ---------- hints: letter labels for following links ---------- */
+
+.link-hint {
+    position: absolute;
+    z-index: 60;
+    padding: 0 5px;
+    border-radius: 3px;
+    background: var(--my-yellow);
+    color: var(--bg);
+    font-size: 0.72rem;
+    line-height: 1.5;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+    pointer-events: none;
+    transform: translateX(-4px);
+}
+
+.link-hint.is-dim {
+    opacity: 0.25;
+}
+
+/* ---------- more below: "↓3" at the list's right edge while entries are hidden (features.js) ---------- */
+
+.more-below {
+    display: none;
+    position: fixed;
+    z-index: 35;
+    align-items: baseline;
+    gap: 2px;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: 2rem;
+    line-height: 1;
+    color: var(--my-yellow);
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+}
+
+html.has-more-below .more-below {
+    display: inline-flex;
+}
+
+.more-below:hover {
+    opacity: 0.75;
+}
+
+.more-below b {
+    font-weight: normal;
+    font-size: 0.6em;
+}

@@ -1,0 +1,244 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Cheap intelligence: routine decisions without long reasoning traces</title><meta name="description" content="Routine decisions have short answers. A small decision model checks each cheap answer and escalates to reasoning only when it is likely wrong: 2.5× fewer output tokens and 47% lower cost on 300 back-office tasks.">
+<link rel="icon" href="../../assets/Code_javascript_development-512.ico">
+<link rel="expect" href="#page-ready" blocking="render">
+<style>
+@font-face{font-family:'0xProto';src:url('../../assets/0xProto-Regular.woff2') format('woff2'),
+url('../../assets/0xProtoNerdFont-Regular.ttf') format('truetype');font-weight:normal;font-style:normal;font-display:swap}
+:root{color-scheme:dark;--bg:#2e3440;--panel:#333a47;--line:#434c5e;--hair:#3b4252;--ink:#eceff4;
+--ink2:#c2c9d6;--ink3:#9aa3b5;--dim:#818a9c;--s-base:#81a1c1;--s-reason:#d08770;--s-ours:#a3be8c;--accent:#ebcb8b;
+--accent-soft:rgba(235,203,139,.08);--ours-soft:rgba(163,190,140,.08)}
+*{box-sizing:border-box}
+body{margin:0;background-color:var(--bg);color:var(--ink);font:400 15px/1.7 '0xProto',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+/* same sky as the rest of the site (style.css + assets/sky.js): nebula clouds, stars, scanlines */
+.bg-layer,.bg-canvas,body:after{position:fixed;inset:0;z-index:-1;pointer-events:none}
+body:after{content:""}
+.bg-layer{overflow:hidden;background:radial-gradient(40vw 30vh at 55% 55%,rgba(163,190,140,.07),transparent 70%)}
+.bg-layer:before,.bg-layer:after{content:"";position:absolute;border-radius:50%}
+.bg-layer{view-transition-name:sky-clouds}.bg-canvas{view-transition-name:sky-stars}
+.bg-layer:before{top:-10vh;right:-5vw;width:60vw;height:60vh;background:radial-gradient(closest-side,rgba(180,142,173,.26),rgba(180,142,173,.1) 50%,transparent);animation:nebula-drift 40s ease-in-out var(--drift-a,0s) infinite alternate}
+.bg-layer:after{bottom:-15vh;left:-10vw;width:65vw;height:65vh;background:radial-gradient(closest-side,rgba(94,129,172,.28),rgba(94,129,172,.1) 50%,transparent);animation:nebula-drift 52s ease-in-out var(--drift-b,0s) infinite alternate-reverse}
+@keyframes nebula-drift{to{transform:translate(-6vw,5vh) scale(1.12)}}
+body:after{background-image:repeating-linear-gradient(to bottom,rgba(236,239,244,.06) 0 1px,transparent 1px 4px)}
+::selection{background:var(--accent);color:var(--bg)}
+b,strong{font-weight:normal;color:var(--ink)}
+.wrap{max-width:920px;margin:0 auto;padding:0 24px 96px}
+@media(max-width:600px){.wrap{padding:0 18px 64px}}
+/* same frame as the other pages (style.css): nav and content start at the same place */
+@media(min-width:1024px){.wrap{max-width:1520px;padding-left:76px}.wrap>:not(.header-top){max-width:920px}}
+.header-top{padding-top:40px;display:flex;flex-wrap:wrap;align-items:flex-end;gap:0 36px;margin-bottom:44px;border-bottom:1px solid var(--line)}
+.header-top a{display:block;padding-bottom:14px;margin-bottom:-1px;border-bottom:2px solid transparent;color:var(--dim);
+font-size:1.5rem;text-decoration:none;transition:color .15s ease,border-color .15s ease}
+.header-top a:hover{color:var(--ink);border-bottom-color:#4c566a}
+.header-top a[aria-current="page"]{color:var(--accent);border-bottom-color:var(--accent)}
+/* animated tab changes, same as the rest of the site (style.css) */
+@view-transition{navigation:auto}
+.header-top{position:relative}.header-top a[aria-current="page"]{border-bottom-color:transparent}
+.tab-line{position:absolute;bottom:-1px;box-sizing:content-box;height:calc(var(--tab-h,40px) + 8px);margin-left:-12px;padding:0 12px;border-bottom:2px solid var(--accent);
+border-radius:6px 6px 0 0;background:rgba(235,203,139,.12);view-transition-name:tab-line}
+.header-top{view-transition-name:site-nav}
+::view-transition-group(root),::view-transition-group(site-nav),::view-transition-group(sky-clouds),::view-transition-group(sky-stars),::view-transition-old(root),::view-transition-new(root),::view-transition-new(site-nav),::view-transition-new(sky-clouds),::view-transition-new(sky-stars){animation:none}
+::view-transition-old(site-nav),::view-transition-old(sky-clouds),::view-transition-old(sky-stars){animation:none;opacity:0}
+::view-transition-group(tab-line){animation-duration:.3s;animation-timing-function:cubic-bezier(.2,.7,.2,1)}
+@media(max-width:600px){.header-top{gap:0 20px;padding-top:24px;margin-bottom:28px}.header-top a{font-size:1.05rem;padding-bottom:12px}}
+header{padding:0 0 40px}
+h1{font-weight:normal;font-size:clamp(24px,3.6vw,36px);line-height:1.25;letter-spacing:-.01em;margin:0 0 22px;
+max-width:34ch;color:var(--ink)}
+.lede{font-size:16.5px;line-height:1.75;color:var(--ink2);max-width:72ch;margin:0 0 26px}
+.lede b{color:var(--s-ours)}
+.byline{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px;color:var(--ink3);margin:0 0 28px}
+.byline span:not(:last-child):after{content:"";margin-left:18px;border-left:1px solid var(--line)}
+h2{font-size:21px;font-weight:normal;line-height:1.35;margin:0 0 14px;color:var(--ink)}
+h2:before{content:"## ";color:var(--dim)}
+h3{font-weight:normal;color:var(--ink)}
+.sec{padding-top:52px;border-top:1px solid var(--line);margin-top:52px}
+p{color:var(--ink2);margin:0 0 15px}
+.wide{max-width:76ch}
+.meta{font-size:13px;color:var(--ink3);margin-top:14px;max-width:80ch}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:0;background:var(--panel);border:1px solid var(--line);
+border-radius:10px;margin:8px 0 0;overflow:hidden}
+.stat{padding:22px 20px 20px;border-right:1px solid var(--line)}
+.stat:last-child{border-right:0}
+.stat .n{font-size:30px;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums;color:var(--ink)}
+.stat .n.acc{color:var(--s-ours)}
+.stat .c{font-size:12.5px;color:var(--ink3);margin-top:10px;line-height:1.5}
+.stat .c b{color:var(--ink)}
+@media(max-width:560px){.stats{grid-template-columns:1fr}.stat{border-right:0;border-bottom:1px solid var(--line)}
+.stat:last-child{border-bottom:0}}
+figure{margin:0}
+.fig{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:24px 24px 18px}
+figcaption{font-size:13px;color:var(--ink3);margin-top:14px;line-height:1.6;max-width:80ch}
+figcaption b{color:var(--ink2)}
+.chart,.flow{width:100%;height:auto;display:block;overflow:visible}
+.grid{stroke:var(--line);stroke-width:1}
+.tick{fill:var(--ink3);font-size:11px;font-variant-numeric:tabular-nums}
+.axis{fill:var(--ink3);font-size:11px}
+.note{fill:var(--ink3);font-size:11px;font-style:italic}
+.mixline{stroke:var(--ink3);stroke-width:1.75;stroke-dasharray:2 5;stroke-linecap:round;opacity:.85}
+.pt circle{fill:var(--c);stroke:var(--panel);stroke-width:2}
+.pt.open circle{fill:var(--panel);stroke:var(--c);stroke-width:2.75}
+g.open .bar{fill:color-mix(in srgb,var(--c) 22%,transparent);stroke:var(--c);stroke-width:1.5}
+.key i{border:1px solid transparent}.key.open i{background:transparent;border:2px solid var(--c);border-radius:50%}
+.pt .err{stroke:var(--c);stroke-width:2;opacity:.4;stroke-linecap:round}
+.pt .lab{fill:var(--ink);font-size:12.5px}
+.pt .sub{fill:var(--ink3);font-size:11px;font-variant-numeric:tabular-nums}
+.bar{fill:var(--c)}
+.barlab{fill:var(--ink3);font-size:11px;font-variant-numeric:tabular-nums}
+.barlab .strong{fill:var(--ink)}
+.setname{fill:var(--ink);font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.lhname{fill:var(--ink);font-size:12px}
+.legend{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:12.5px;color:var(--ink2);margin:0 0 16px}
+.key i{display:inline-block;width:9px;height:9px;border-radius:3px;background:var(--c);margin-right:8px}
+.flow rect{fill:var(--bg);stroke:var(--line);stroke-width:1}
+.flow .ob rect{stroke:var(--accent);fill:var(--accent-soft)}
+.flow .gb rect{stroke:var(--s-ours)}
+.flow .eb rect{stroke:var(--s-reason);stroke-dasharray:4 3}
+.flow .bt{fill:var(--ink);font-size:12.5px}
+.flow .bs{fill:var(--ink3);font-size:10.5px}
+.flow .arrow{stroke:var(--ink3);stroke-width:1.5}
+.flow .arrow.dash{stroke-dasharray:4 3}
+.flow .head{fill:var(--ink3)}
+.flow .al{fill:var(--ink2);font-size:11px}
+.flow .al2{fill:var(--ink3);font-size:11px}
+table{width:100%;border-collapse:separate;border-spacing:0;font-size:13.5px;font-variant-numeric:tabular-nums;
+background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th,td{text-align:right;padding:11px 12px;border-bottom:1px solid var(--hair);color:var(--ink2)}
+tbody tr:last-child td{border-bottom:0}
+th:first-child,td:first-child{text-align:left;padding-left:16px}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);font-weight:normal;
+border-bottom:1px solid var(--line)}
+td.name{color:var(--ink)}
+td.dim{color:var(--ink3)}
+tr.ours td{background:var(--ours-soft)}
+tr.ours td.name{box-shadow:inset 3px 0 0 var(--s-ours)}
+@media(max-width:720px){table{display:block;overflow-x:auto;white-space:nowrap}}
+a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:3px}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+
+</style></head>
+<body><main class="wrap">
+<nav class="header-top">
+  <a href="../../index.html">Projects</a>
+  <a href="../../experience.html">Experience</a>
+  <a href="../index.html" aria-current="page">Research</a>
+</nav>
+<header>
+  <h1>Cheap intelligence: routine decisions without long reasoning traces</h1>
+  <p class="lede">Routine decisions (expenses, SLA breaches, tickets, ledgers) have short answers. Answer them
+     with reasoning off, let a small decision model score each answer, and escalate only the doubtful ones:
+     <b>2.5×</b> fewer output tokens and <b>47%</b> lower cost on 300 back-office tasks.</p>
+  <p class="byline"><span>Hasan Shabani</span><span>deepseek/deepseek-v4-flash-0731</span><span>300 back-office tasks</span><span>660 benchmark questions</span></p>
+</header>
+
+<div class="stats">
+  <div class="stat"><div class="n acc">2.5×</div>
+    <div class="c">fewer output tokens than always reasoning<br><b>314</b> vs <b>793</b> per task</div></div>
+  <div class="stat"><div class="n acc">47%</div>
+    <div class="c">lower cost<br><b>$0.070</b> vs <b>$0.132</b> per 1,000 tasks</div></div>
+  <div class="stat"><div class="n">96.3%</div>
+    <div class="c">accuracy<br>against <b>99.7%</b> with full reasoning</div></div>
+</div>
+
+<section class="sec">
+  <h2>Method</h2>
+  <figure class="fig"><svg viewBox="0 0 720 196.0" class="flow" role="img" aria-label="The question is answered cheaply, the answer is scored by a decision model, and only a low score sends it to a reasoning pass before submission; a cheap retry goes back to the decision model to be scored again"><g class=""><rect x="0.0" y="16.0" width="132.0" height="50.0" rx="9.0"/><text class="bt" x="66.0" y="38.0" text-anchor="middle">Question</text><text class="bs" x="66.0" y="53.0" text-anchor="middle">one prompt</text></g><line class="arrow" x1="132.0" y1="41.0" x2="169.0" y2="41.0"/><path class="head" d="M169.0,37.0 L176.0,41.0 L169.0,45.0Z"/><g class=""><rect x="176.0" y="16.0" width="146.0" height="50.0" rx="9.0"/><text class="bt" x="249.0" y="38.0" text-anchor="middle">Fast answer</text><text class="bs" x="249.0" y="53.0" text-anchor="middle">reasoning off</text></g><line class="arrow" x1="322.0" y1="41.0" x2="359.0" y2="41.0"/><path class="head" d="M359.0,37.0 L366.0,41.0 L359.0,45.0Z"/><g class="ob"><rect x="366.0" y="16.0" width="154.0" height="50.0" rx="9.0"/><text class="bt" x="443.0" y="38.0" text-anchor="middle">Decision model</text><text class="bs" x="443.0" y="53.0" text-anchor="middle">P(correct)</text></g><line class="arrow" x1="520.0" y1="41.0" x2="593.0" y2="41.0"/><path class="head" d="M593.0,37.0 L600.0,41.0 L593.0,45.0Z"/><text class="al" x="560.0" y="33.0" text-anchor="middle">&#8805; 0.7</text><g class="gb"><rect x="600.0" y="16.0" width="120.0" height="50.0" rx="9.0"/><text class="bt" x="660.0" y="38.0" text-anchor="middle">Submit</text><text class="bs" x="660.0" y="53.0" text-anchor="middle">done</text></g><line class="arrow" x1="462.0" y1="66.0" x2="462.0" y2="111.0"/><path class="head" d="M458.0,111.0 L462.0,118.0 L466.0,111.0Z"/><text class="al" x="471.0" y="96.0">&lt; 0.7</text><line class="arrow dash" x1="424.0" y1="118.0" x2="424.0" y2="73.0"/><path class="head" d="M420.0,73.0 L424.0,66.0 L428.0,73.0Z"/><text class="al2" x="415.0" y="96.0" text-anchor="end">cheap retry: re-score</text><g class="eb"><rect x="366.0" y="118.0" width="154.0" height="50.0" rx="9.0"/><text class="bt" x="443.0" y="140.0" text-anchor="middle">Reasoning pass</text><text class="bs" x="443.0" y="155.0" text-anchor="middle">or another cheap try</text></g><line class="arrow" x1="520.0" y1="143.0" x2="660.0" y2="143.0"/><line class="arrow" x1="660.0" y1="143.0" x2="660.0" y2="73.0"/><path class="head" d="M656.0,73.0 L660.0,66.0 L664.0,73.0Z"/><text class="al2" x="366.0" y="185.0">paid only when the score is low</text></svg>
+    <figcaption><b>Figure 1.</b> Reason only below 0.7. A cheap retry is scored again (dashed).</figcaption></figure>
+  <p class="wide" style="margin-top:24px">Below 0.7, <i>gate + reasoning</i> runs the reasoning pass; <i>gate
+     only</i> retries cheaply and keeps the best-scored answer.</p>
+</section>
+
+<section class="sec">
+  <h2>Back-office decisions</h2>
+  <table><thead><tr><th>Workload</th><th>Gate</th><th>Reasoning</th><th>Output tokens</th><th>Saving</th><th>Escalated</th></tr></thead><tbody><tr class=ours><td class='name'>Reconciliation</td><td>100%</td><td>100%</td><td class='dim'>12 vs 115</td><td>9.6×</td><td class='dim'>4%</td></tr><tr class=ours><td class='name'>Expense rulings</td><td>100%</td><td>100%</td><td class='dim'>10 vs 96</td><td>9.3×</td><td class='dim'>8%</td></tr><tr><td class='name'>SLA breach calls</td><td>98%</td><td>100%</td><td class='dim'>48 vs 176</td><td>3.7×</td><td class='dim'>20%</td></tr><tr class=ours><td class='name'>Ticket routing</td><td>100%</td><td>100%</td><td class='dim'>22 vs 71</td><td>3.2×</td><td class='dim'>18%</td></tr><tr><td class='name'>Contract dates</td><td>84%</td><td>98%</td><td class='dim'>1,519 vs 3,739</td><td>2.5×</td><td class='dim'>20%</td></tr><tr><td class='name'>Invoice arithmetic</td><td>96%</td><td>100%</td><td class='dim'>270 vs 558</td><td>2.1×</td><td class='dim'>0%</td></tr><tr><td class='name'><b>All 300 tasks</b></td><td><b>96.3%</b></td><td><b>99.7%</b></td><td class='dim'>314 vs 793</td><td><b>2.5×</b></td><td class='dim'>12%</td></tr></tbody></table>
+  <p class="meta">96.3% against 99.7% (McNemar p = 0.009). Shaded rows: both score 100%. Reasoning still pays
+     off on contract dates (98% against 84%).</p>
+</section>
+
+<section class="sec">
+  <h2>General benchmarks</h2>
+  <figure class="fig">
+    <p class="legend"><span class="key solid" style="--c:var(--s-base)"><i></i>No reasoning</span><span class="key solid" style="--c:var(--s-ours)"><i></i>Gate only</span><span class="key open" style="--c:var(--s-ours)"><i></i>Gate + reasoning</span><span class="key solid" style="--c:var(--s-reason)"><i></i>Full reasoning</span></p>
+    <svg viewBox="0 0 720 400" class="chart" role="img" aria-label="Accuracy against tokens per question for each policy">
+<line class="grid" x1="56" x2="696" y1="348.0" y2="348.0"/><text class="tick" x="47" y="351.5" text-anchor="end">73%</text>
+<line class="grid" x1="56" x2="696" y1="268.5" y2="268.5"/><text class="tick" x="47" y="272.0" text-anchor="end">78%</text>
+<line class="grid" x1="56" x2="696" y1="189.0" y2="189.0"/><text class="tick" x="47" y="192.5" text-anchor="end">83%</text>
+<line class="grid" x1="56" x2="696" y1="109.5" y2="109.5"/><text class="tick" x="47" y="113.0" text-anchor="end">89%</text>
+<line class="grid" x1="56" x2="696" y1="30.0" y2="30.0"/><text class="tick" x="47" y="33.5" text-anchor="end">94%</text>
+<text class="tick" x="56.0" y="366" text-anchor="middle">0</text>
+<text class="tick" x="181.7" y="366" text-anchor="middle">1,000</text>
+<text class="tick" x="307.4" y="366" text-anchor="middle">2,000</text>
+<text class="tick" x="433.2" y="366" text-anchor="middle">3,000</text>
+<text class="tick" x="558.9" y="366" text-anchor="middle">4,000</text>
+<text class="tick" x="684.6" y="366" text-anchor="middle">5,000</text>
+<text class="axis" x="696" y="390" text-anchor="end">tokens per question →</text>
+<text class="axis" transform="translate(13,34) rotate(-90)" text-anchor="end">← accuracy</text>
+<line class="mixline" x1="159.4" y1="269.8" x2="617.4" y2="114.0"/>
+<text class="note" x="696" y="339" text-anchor="end">dashed: split the traffic between the two baselines</text>
+<g class="pt solid" style="--c:var(--s-base)"><line class="err" x1="159.4" x2="159.4" y1="318.6" y2="225.7"/><circle cx="159.4" cy="269.8" r="6.5"/><text class="lab" x="146.4" y="266.8" text-anchor="end">No reasoning</text><text class="sub" x="146.4" y="281.8" text-anchor="end">77.9% · 822 tok</text><title>No reasoning: 77.9% accuracy, 822 tokens per question, n=660</title></g>
+<g class="pt solid" style="--c:var(--s-ours)"><line class="err" x1="236.1" x2="236.1" y1="220.0" y2="138.4"/><circle cx="236.1" cy="176.3" r="6.5"/><text class="lab" x="249.1" y="173.3" text-anchor="start">Gate only</text><text class="sub" x="249.1" y="188.3" text-anchor="start">84.2% · 1,433 tok</text><title>Gate only: 84.2% accuracy, 1,433 tokens per question, n=660</title></g>
+<g class="pt open" style="--c:var(--s-ours)"><line class="err" x1="498.7" x2="498.7" y1="167.5" y2="93.5"/><circle cx="498.7" cy="127.3" r="6.5"/><text class="lab" x="485.7" y="124.3" text-anchor="end">Gate + reasoning</text><text class="sub" x="485.7" y="139.3" text-anchor="end">87.6% · 3,522 tok</text><title>Gate + reasoning: 87.6% accuracy, 3,522 tokens per question, n=660</title></g>
+<g class="pt solid" style="--c:var(--s-reason)"><line class="err" x1="617.4" x2="617.4" y1="153.1" y2="81.4"/><circle cx="617.4" cy="114.0" r="6.5"/><text class="lab" x="617.4" y="87.0" text-anchor="end">Full reasoning</text><text class="sub" x="617.4" y="101.0" text-anchor="end">88.5% · 4,465 tok</text><title>Full reasoning: 88.5% accuracy, 4,465 tokens per question, n=660</title></g>
+</svg>
+    <figcaption><b>Figure 2.</b> Accuracy against tokens on 660 held-out questions. <i>Gate only</i> sits +4.6 points above the dashed traffic-split baseline (95% CI +1.8 to +7.5).</figcaption>
+  </figure>
+  <div style="margin-top:26px"><table><thead><tr><th>Policy</th><th>Accuracy</th><th>95% CI</th><th>Tokens</th><th>vs reasoning</th><th>Tokens / correct</th></tr></thead><tbody><tr><td class='name'>No reasoning</td><td>77.9%</td><td class='dim'>75%–81%</td><td>822</td><td class='dim'>-10.6 pts · 0.18×</td><td>1,056</td></tr><tr class=ours><td class='name'>Gate only</td><td>84.2%</td><td class='dim'>81%–87%</td><td>1,433</td><td class='dim'>-4.2 pts · 0.32×</td><td>1,701</td></tr><tr class=ours><td class='name'>Gate + reasoning</td><td>87.6%</td><td class='dim'>85%–90%</td><td>3,522</td><td class='dim'>-0.9 pts · 0.79×</td><td>4,021</td></tr><tr><td class='name'>Full reasoning</td><td>88.5%</td><td class='dim'>86%–91%</td><td>4,465</td><td class='dim'>reference</td><td>5,047</td></tr></tbody></table></div>
+  <figure class="fig" style="margin-top:26px"><p class="legend"><span class="key solid" style="--c:var(--s-base)"><i></i>No reasoning</span><span class="key solid" style="--c:var(--s-ours)"><i></i>Gate only</span><span class="key open" style="--c:var(--s-ours)"><i></i>Gate + reasoning</span><span class="key solid" style="--c:var(--s-reason)"><i></i>Full reasoning</span></p><svg viewBox="0 0 720 640" class="chart" role="img" aria-label="Accuracy by benchmark">
+<text class="setname" x="0" y="13">GPQA</text><line class="grid" x1="0" x2="720" y1="20" y2="20"/>
+<g class="solid" style="--c:var(--s-base)"><rect class="bar" x="0" y="26" width="388.6" height="15" rx="3"/><text class="barlab" x="397.6" y="38"><tspan class="strong">68%</tspan> · 838 tok</text><title>No reasoning on GPQA: 68.2%, 838 tokens, n=198</title></g>
+<g class="solid" style="--c:var(--s-ours)"><rect class="bar" x="0" y="48" width="446.2" height="15" rx="3"/><text class="barlab" x="455.2" y="60"><tspan class="strong">78%</tspan> · 2,067 tok</text><title>Gate only on GPQA: 78.3%, 2,067 tokens, n=198</title></g>
+<g class="open" style="--c:var(--s-ours)"><rect class="bar" x="0" y="70" width="489.4" height="15" rx="3"/><text class="barlab" x="498.4" y="82"><tspan class="strong">86%</tspan> · 6,674 tok</text><title>Gate + reasoning on GPQA: 85.9%, 6,674 tokens, n=198</title></g>
+<g class="solid" style="--c:var(--s-reason)"><rect class="bar" x="0" y="92" width="477.9" height="15" rx="3"/><text class="barlab" x="486.9" y="104"><tspan class="strong">84%</tspan> · 7,658 tok</text><title>Full reasoning on GPQA: 83.8%, 7,658 tokens, n=198</title></g>
+<text class="setname" x="0" y="141">MMLU-Pro</text><line class="grid" x1="0" x2="720" y1="148" y2="148"/>
+<g class="solid" style="--c:var(--s-base)"><rect class="bar" x="0" y="154" width="444.6" height="15" rx="3"/><text class="barlab" x="453.6" y="166"><tspan class="strong">78%</tspan> · 646 tok</text><title>No reasoning on MMLU-Pro: 78.0%, 646 tokens, n=200</title></g>
+<g class="solid" style="--c:var(--s-ours)"><rect class="bar" x="0" y="176" width="481.6" height="15" rx="3"/><text class="barlab" x="490.6" y="188"><tspan class="strong">84%</tspan> · 1,081 tok</text><title>Gate only on MMLU-Pro: 84.5%, 1,081 tokens, n=200</title></g>
+<g class="open" style="--c:var(--s-ours)"><rect class="bar" x="0" y="198" width="481.6" height="15" rx="3"/><text class="barlab" x="490.6" y="210"><tspan class="strong">84%</tspan> · 2,781 tok</text><title>Gate + reasoning on MMLU-Pro: 84.5%, 2,781 tokens, n=200</title></g>
+<g class="solid" style="--c:var(--s-reason)"><rect class="bar" x="0" y="220" width="478.8" height="15" rx="3"/><text class="barlab" x="487.8" y="232"><tspan class="strong">84%</tspan> · 3,469 tok</text><title>Full reasoning on MMLU-Pro: 84.0%, 3,469 tokens, n=200</title></g>
+<text class="setname" x="0" y="269">MATH-500</text><line class="grid" x1="0" x2="720" y1="276" y2="276"/>
+<g class="solid" style="--c:var(--s-base)"><rect class="bar" x="0" y="282" width="519.0" height="15" rx="3"/><text class="barlab" x="528.0" y="294"><tspan class="strong">91%</tspan> · 941 tok</text><title>No reasoning on MATH-500: 91.0%, 941 tokens, n=134</title></g>
+<g class="solid" style="--c:var(--s-ours)"><rect class="bar" x="0" y="304" width="510.4" height="15" rx="3"/><text class="barlab" x="519.4" y="316"><tspan class="strong">90%</tspan> · 1,168 tok</text><title>Gate only on MATH-500: 89.6%, 1,168 tokens, n=134</title></g>
+<g class="open" style="--c:var(--s-ours)"><rect class="bar" x="0" y="326" width="527.5" height="15" rx="3"/><text class="barlab" x="536.5" y="338"><tspan class="strong">93%</tspan> · 1,113 tok</text><title>Gate + reasoning on MATH-500: 92.5%, 1,113 tokens, n=134</title></g>
+<g class="solid" style="--c:var(--s-reason)"><rect class="bar" x="0" y="348" width="540.2" height="15" rx="3"/><text class="barlab" x="549.2" y="360"><tspan class="strong">95%</tspan> · 2,536 tok</text><title>Full reasoning on MATH-500: 94.8%, 2,536 tokens, n=134</title></g>
+<text class="setname" x="0" y="397">AIME 2025</text><line class="grid" x1="0" x2="720" y1="404" y2="404"/>
+<g class="solid" style="--c:var(--s-base)"><rect class="bar" x="0" y="410" width="247.0" height="15" rx="3"/><text class="barlab" x="256.0" y="422"><tspan class="strong">43%</tspan> · 2,783 tok</text><title>No reasoning on AIME 2025: 43.3%, 2,783 tokens, n=30</title></g>
+<g class="solid" style="--c:var(--s-ours)"><rect class="bar" x="0" y="432" width="399.0" height="15" rx="3"/><text class="barlab" x="408.0" y="444"><tspan class="strong">70%</tspan> · 3,556 tok</text><title>Gate only on AIME 2025: 70.0%, 3,556 tokens, n=30</title></g>
+<g class="open" style="--c:var(--s-ours)"><rect class="bar" x="0" y="454" width="437.0" height="15" rx="3"/><text class="barlab" x="446.0" y="466"><tspan class="strong">77%</tspan> · 8,370 tok</text><title>Gate + reasoning on AIME 2025: 76.7%, 8,370 tokens, n=30</title></g>
+<g class="solid" style="--c:var(--s-reason)"><rect class="bar" x="0" y="476" width="532.0" height="15" rx="3"/><text class="barlab" x="541.0" y="488"><tspan class="strong">93%</tspan> · 10,753 tok</text><title>Full reasoning on AIME 2025: 93.3%, 10,753 tokens, n=30</title></g>
+<text class="setname" x="0" y="525">Stress suite</text><line class="grid" x1="0" x2="720" y1="532" y2="532"/>
+<g class="solid" style="--c:var(--s-base)"><rect class="bar" x="0" y="538" width="511.8" height="15" rx="3"/><text class="barlab" x="520.8" y="550"><tspan class="strong">90%</tspan> · 389 tok</text><title>No reasoning on Stress suite: 89.8%, 389 tokens, n=98</title></g>
+<g class="solid" style="--c:var(--s-ours)"><rect class="bar" x="0" y="560" width="529.3" height="15" rx="3"/><text class="barlab" x="538.3" y="572"><tspan class="strong">93%</tspan> · 581 tok</text><title>Gate only on Stress suite: 92.9%, 581 tokens, n=98</title></g>
+<g class="open" style="--c:var(--s-ours)"><rect class="bar" x="0" y="582" width="535.1" height="15" rx="3"/><text class="barlab" x="544.1" y="594"><tspan class="strong">94%</tspan> · 474 tok</text><title>Gate + reasoning on Stress suite: 93.9%, 474 tokens, n=98</title></g>
+<g class="solid" style="--c:var(--s-reason)"><rect class="bar" x="0" y="604" width="552.6" height="15" rx="3"/><text class="barlab" x="561.6" y="616"><tspan class="strong">97%</tspan> · 761 tok</text><title>Full reasoning on Stress suite: 96.9%, 761 tokens, n=98</title></g>
+</svg>
+    <figcaption><b>Figure 3.</b> By benchmark. The gate gives up most on AIME 2025 (n = 30), competition maths that needs a long trace.</figcaption>
+  </figure>
+</section>
+
+<section class="sec">
+  <h2>Limitation</h2>
+  <p class="wide">The model was never trained to work with a gate: rejected answers mostly come back unchanged,
+     so gating every step of a long task falls apart.</p>
+  <figure class="fig" style="margin-top:26px">
+    <svg viewBox="0 0 720 128" class="chart" role="img" aria-label="Accuracy on long-horizon tasks">
+<g class="solid" style="--c:var(--s-base)"><text class="lhname" x="158" y="16" text-anchor="end">No reasoning</text><rect class="bar" x="170" y="0" width="245.7" height="20" rx="3"/><text class="barlab" x="425.7" y="16"><tspan class="strong">73%</tspan> solved · 29,042 tok</text><title>No reasoning: 73.3% of 15 episodes solved, 29,042 tokens each</title></g>
+<g class="solid" style="--c:var(--s-ours)"><text class="lhname" x="158" y="46" text-anchor="end">Gate only</text><rect class="bar" x="170" y="30" width="178.7" height="20" rx="3"/><text class="barlab" x="358.7" y="46"><tspan class="strong">53%</tspan> solved · 105,832 tok</text><title>Gate only: 53.3% of 15 episodes solved, 105,832 tokens each</title></g>
+<g class="open" style="--c:var(--s-ours)"><text class="lhname" x="158" y="76" text-anchor="end">Gate per step (veto)</text><rect class="bar" x="170" y="60" width="290.3" height="20" rx="3"/><text class="barlab" x="470.3" y="76"><tspan class="strong">87%</tspan> solved · 33,076 tok</text><title>Gate per step (veto): 86.7% of 15 episodes solved, 33,076 tokens each</title></g>
+<g class="solid" style="--c:var(--s-reason)"><text class="lhname" x="158" y="106" text-anchor="end">Full reasoning</text><rect class="bar" x="170" y="90" width="335.0" height="20" rx="3"/><text class="barlab" x="515.0" y="106"><tspan class="strong">100%</tspan> solved · 64,212 tok</text><title>Full reasoning: 100.0% of 15 episodes solved, 64,212 tokens each</title></g>
+</svg>
+    <figcaption><b>Figure 4.</b> Gating every step of 15 long-horizon episodes: <i>gate only</i> 53%, below no reasoning (73%). Vetoing only confident rejections recovers to 87%.</figcaption>
+  </figure>
+</section>
+
+<section class="sec">
+  <h2>Next step</h2>
+  <p class="wide">Post-train the model on this run's graded records so it defers and revises by itself, then
+     re-run the same tasks.</p>
+</section>
+</main>
+<script src="../../assets/nav.js?v=29"></script>
+<script src="../../assets/sky.js?v=29"></script>
+<div id="page-ready"></div>
+</body></html>
